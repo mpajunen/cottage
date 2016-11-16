@@ -2,6 +2,9 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Events exposing (onClick)
+import Array
+import Random
+import Random.Array
 
 
 --import Html.Attributes exposing (..)
@@ -129,6 +132,7 @@ init =
 type Msg
     = NoOp
     | StartGame
+    | ReceiveDeck Deck
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -139,26 +143,37 @@ update msg model =
                 { rules, cards } =
                     model
 
-                deck =
+                deckGenerator =
                     createDeck rules.deck cards
             in
-                ( { model | deck = deck }
-                , Cmd.none
+                ( model
+                , Random.generate ReceiveDeck deckGenerator
                 )
+
+        ReceiveDeck deck ->
+            ( { model | deck = deck }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
 
 
-createDeck : DeckRules -> Cards -> Deck
+createDeck : DeckRules -> Cards -> Random.Generator Deck
 createDeck { cardCount } cards =
     let
-        { id } =
-            List.head cards
-                |> Maybe.withDefault invalidCard
+        pick =
+            pickRandomCard cards
+                |> Random.map (\card -> card.id)
     in
-        List.repeat cardCount id
-            |> List.indexedMap GameCard
+        Random.list cardCount pick
+            |> Random.map (List.indexedMap GameCard)
+
+
+pickRandomCard : Cards -> Random.Generator Card
+pickRandomCard cards =
+    cards
+        |> Array.fromList
+        |> Random.Array.sample
+        |> Random.map (Maybe.withDefault invalidCard)
 
 
 
