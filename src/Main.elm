@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
+import Html.Events exposing (onClick)
 
 
 --import Html.Attributes exposing (..)
@@ -29,6 +30,10 @@ type alias Cost =
     Int
 
 
+type alias PieceId =
+    Int
+
+
 type alias Card =
     { id : CardId
     , name : String
@@ -40,8 +45,34 @@ type alias Cards =
     List Card
 
 
+type alias CardCount =
+    Int
+
+
+type alias GameCard =
+    { id : PieceId
+    , card : CardId
+    }
+
+
+type alias Deck =
+    List GameCard
+
+
+type alias DeckRules =
+    { cardCount : CardCount
+    }
+
+
+type alias Rules =
+    { deck : DeckRules
+    }
+
+
 type alias Model =
     { cards : Cards
+    , deck : Deck
+    , rules : Rules
     }
 
 
@@ -62,9 +93,27 @@ someCards =
     ]
 
 
+invalidCard : Card
+invalidCard =
+    { id = -1
+    , name = "Invalid card"
+    , cost = 0
+    }
+
+
+rules : Rules
+rules =
+    { deck =
+        { cardCount = 30
+        }
+    }
+
+
 initialModel : Model
 initialModel =
     { cards = someCards
+    , deck = []
+    , rules = rules
     }
 
 
@@ -79,13 +128,37 @@ init =
 
 type Msg
     = NoOp
+    | StartGame
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        StartGame ->
+            let
+                { rules, cards } =
+                    model
+
+                deck =
+                    createDeck rules.deck cards
+            in
+                ( { model | deck = deck }
+                , Cmd.none
+                )
+
         NoOp ->
             ( model, Cmd.none )
+
+
+createDeck : DeckRules -> Cards -> Deck
+createDeck { cardCount } cards =
+    let
+        { id } =
+            List.head cards
+                |> Maybe.withDefault invalidCard
+    in
+        List.repeat cardCount id
+            |> List.indexedMap GameCard
 
 
 
@@ -102,10 +175,14 @@ subscriptions model =
 
 
 view : Model -> Html Msg
-view model =
+view { cards, deck } =
     div []
         [ h1 [] [ text "Cottage" ]
-        , cardList model.cards
+        , button [ onClick StartGame ] [ text "Start game" ]
+        , h2 [] [ text "Cards" ]
+        , cardList cards
+        , h2 [] [ text "Deck" ]
+        , cardList (findDeckCards cards deck)
         ]
 
 
@@ -140,6 +217,24 @@ tableCell header value =
 
         True ->
             th [] [ text value ]
+
+
+findDeckCards : Cards -> Deck -> Cards
+findDeckCards cards deck =
+    deck
+        |> List.map (\card -> card.card)
+        |> List.map (findCard cards)
+
+
+findCard : Cards -> CardId -> Card
+findCard cards id =
+    let
+        card =
+            cards
+                |> List.filter (\card -> card.id == id)
+                |> List.head
+    in
+        Maybe.withDefault invalidCard card
 
 
 getCardValues : Card -> List String
