@@ -63,6 +63,16 @@ type alias Deck =
     List GameCard
 
 
+type alias Hand =
+    List GameCard
+
+
+type alias Player =
+    { deck : Deck
+    , hand : Hand
+    }
+
+
 type alias DeckRules =
     { cardCount : CardCount
     }
@@ -75,7 +85,7 @@ type alias Rules =
 
 type alias Model =
     { cards : Cards
-    , deck : Deck
+    , player : Player
     , rules : Rules
     }
 
@@ -117,10 +127,17 @@ rules =
     }
 
 
+newPlayer : Player
+newPlayer =
+    { deck = []
+    , hand = []
+    }
+
+
 initialModel : Model
 initialModel =
     { cards = someCards
-    , deck = []
+    , player = newPlayer
     , rules = rules
     }
 
@@ -151,15 +168,24 @@ update msg model =
                 deckGenerator =
                     createDeck rules.deck cards
             in
-                ( model
+                ( { model | player = newPlayer }
                 , Random.generate ReceiveDeck deckGenerator
                 )
 
         ReceiveDeck deck ->
-            ( { model | deck = deck }, Cmd.none )
+            let
+                player =
+                    initializePlayer model deck
+            in
+                ( { model | player = player }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
+
+
+initializePlayer : Model -> Deck -> Player
+initializePlayer { player } deck =
+    { player | deck = deck }
 
 
 createDeck : DeckRules -> Cards -> Random.Generator Deck
@@ -207,11 +233,11 @@ view model =
 
 
 gameView : Model -> Html Msg
-gameView { cards, deck } =
+gameView { cards, player } =
     div [ style gameStyle ]
         [ h2 [] [ text "Deck" ]
-        , deckView deck
-        , cardList (findDeckCards cards deck)
+        , deckView player.deck
+        , cardList (findDeckCards cards player.deck)
         ]
 
 
