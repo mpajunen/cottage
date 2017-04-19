@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
+import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Array
 import Random
@@ -77,6 +78,10 @@ type alias Model =
     , deck : Deck
     , rules : Rules
     }
+
+
+type alias Style =
+    List ( String, String )
 
 
 someCards : Cards
@@ -190,14 +195,58 @@ subscriptions model =
 
 
 view : Model -> Html Msg
-view { cards, deck } =
+view model =
     div []
         [ h1 [] [ text "Cottage" ]
         , button [ onClick StartGame ] [ text "Start game" ]
-        , h2 [] [ text "Cards" ]
-        , cardList cards
-        , h2 [] [ text "Deck" ]
+        , div [ style mainStyle ]
+            [ gameView model
+            , cardsView model.cards
+            ]
+        ]
+
+
+gameView : Model -> Html Msg
+gameView { cards, deck } =
+    div [ style gameStyle ]
+        [ h2 [] [ text "Deck" ]
+        , deckView deck
         , cardList (findDeckCards cards deck)
+        ]
+
+
+deckView : Deck -> Html Msg
+deckView deck =
+    div [ style deckStyle ]
+        [ text ("(" ++ (toString <| List.length deck) ++ ")") ]
+
+
+cardsView : Cards -> Html Msg
+cardsView cards =
+    div [ style cardsStyle ]
+        [ h2 [] [ text "Cards" ]
+        , cardBox cards
+        ]
+
+
+cardBox : Cards -> Html Msg
+cardBox cards =
+    div [ style cardBoxStyle ]
+        (List.map cardView cards)
+
+
+cardView : Card -> Html Msg
+cardView card =
+    div [ style cardStyle ]
+        [ cardBar card
+        ]
+
+
+cardBar : Card -> Html Msg
+cardBar card =
+    div [ style cardBarStyle ]
+        [ div [ style cardTitleStyle ] [ text card.name ]
+        , div [ style cardCostStyle ] [ text <| toString card.cost ]
         ]
 
 
@@ -263,4 +312,69 @@ cardFieldLabels : List String
 cardFieldLabels =
     [ "Name"
     , "Cost"
+    ]
+
+
+mainStyle : Style
+mainStyle =
+    [ ( "display", "flex" )
+    ]
+
+
+gameStyle : Style
+gameStyle =
+    [ ( "flex", "3 auto" )
+    ]
+
+
+cardsStyle : Style
+cardsStyle =
+    [ ( "flex", "1 auto" )
+    ]
+
+
+cardBoxStyle : Style
+cardBoxStyle =
+    [ ( "display", "flex" )
+    , ( "justify-content", "center" )
+    ]
+
+
+deckStyle : Style
+deckStyle =
+    cardStyle
+        ++ [ ( "display", "flex" )
+           , ( "background-color", "#dddddd" )
+           , ( "flex-flow", "column" )
+           , ( "align-items", "center" )
+           , ( "justify-content", "center" )
+           ]
+
+
+cardStyle : Style
+cardStyle =
+    [ ( "border", "1px solid #000000" )
+    , ( "height", "180px" )
+    , ( "width", "120px" )
+    , ( "margin", "5px" )
+    ]
+
+
+cardBarStyle : Style
+cardBarStyle =
+    [ ( "display", "flex" )
+    ]
+
+
+cardCostStyle : Style
+cardCostStyle =
+    [ ( "flex", "1 auto" )
+    , ( "padding", "5px" )
+    ]
+
+
+cardTitleStyle : Style
+cardTitleStyle =
+    [ ( "flex", "3 auto" )
+    , ( "padding", "5px" )
     ]
