@@ -153,6 +153,7 @@ init =
 
 type Msg
     = NoOp
+    | Draw Int
     | StartGame
     | ReceiveDeck Deck
 
@@ -160,6 +161,9 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Draw count ->
+            ( { model | player = draw count model.player }, Cmd.none )
+
         StartGame ->
             let
                 { rules, cards } =
@@ -199,6 +203,14 @@ createDeck { cardCount } cards =
             |> Random.map (List.indexedMap GameCard)
 
 
+draw : Int -> Player -> Player
+draw count player =
+    { player
+        | deck = List.drop count player.deck
+        , hand = player.hand ++ (List.take count player.deck)
+    }
+
+
 pickRandomCard : Cards -> Random.Generator Card
 pickRandomCard cards =
     cards
@@ -235,7 +247,10 @@ view model =
 gameView : Model -> Html Msg
 gameView { cards, player } =
     div [ style gameStyle ]
-        [ h2 [] [ text "Deck" ]
+        [ h2 [] [ text "Hand" ]
+        , cardBox (findDeckCards cards player.hand)
+        , h2 [] [ text "Deck" ]
+        , button [ onClick (Draw 1) ] [ text "Draw" ]
         , deckView player.deck
         , cardList (findDeckCards cards player.deck)
         ]
@@ -363,6 +378,7 @@ cardBoxStyle : Style
 cardBoxStyle =
     [ ( "display", "flex" )
     , ( "justify-content", "center" )
+    , ( "flex-flow", "row wrap" )
     ]
 
 
