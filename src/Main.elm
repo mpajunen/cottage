@@ -80,6 +80,7 @@ type alias DeckRules =
 
 type alias Rules =
     { deck : DeckRules
+    , initialDraw : CardCount
     }
 
 
@@ -124,6 +125,7 @@ rules =
     { deck =
         { cardCount = 30
         }
+    , initialDraw = 5
     }
 
 
@@ -188,8 +190,13 @@ update msg model =
 
 
 initializePlayer : Model -> Deck -> Player
-initializePlayer { player } deck =
-    { player | deck = deck }
+initializePlayer { player, rules } deck =
+    let
+        initialDraw =
+            draw rules.initialDraw
+    in
+        { player | deck = deck }
+            |> initialDraw
 
 
 createDeck : DeckRules -> Cards -> Random.Generator Deck
