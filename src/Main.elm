@@ -60,6 +60,10 @@ type alias GameCard =
     }
 
 
+type alias GameCards =
+    List ( PieceId, Card )
+
+
 type alias Deck =
     List GameCard
 
@@ -111,11 +115,17 @@ type alias Rules =
     }
 
 
+type alias Ui =
+    { activeCard : Maybe PieceId
+    }
+
+
 type alias Model =
     { cards : Cards
     , board : BoardCards
     , player : Player
     , rules : Rules
+    , ui : Ui
     }
 
 
@@ -169,12 +179,18 @@ emptyBoard =
     Dict.empty
 
 
+initialUi =
+    { activeCard = Nothing
+    }
+
+
 initialModel : Model
 initialModel =
     { cards = someCards
     , board = emptyBoard
     , player = newPlayer
     , rules = rules
+    , ui = initialUi
     }
 
 
@@ -190,6 +206,7 @@ init =
 type Msg
     = NoOp
     | Draw Int
+    | SelectCard PieceId
     | StartGame
     | ReceiveDeck Deck
 
@@ -199,6 +216,16 @@ update msg model =
     case msg of
         Draw count ->
             ( { model | player = draw count model.player }, Cmd.none )
+
+        SelectCard id ->
+            let
+                { ui } =
+                    model
+
+                updatedUi =
+                    { ui | activeCard = Just id }
+            in
+                ( { model | ui = updatedUi }, Cmd.none )
 
         StartGame ->
             let
@@ -291,12 +318,12 @@ view model =
 
 
 gameView : Model -> Html Msg
-gameView { board, cards, player } =
+gameView { board, cards, player, ui } =
     div [ style gameStyle ]
         [ h2 [] [ text "Board" ]
         , boardView cards board
         , h2 [] [ text "Hand" ]
-        , cardBox (findDeckCards cards player.hand)
+        , handView ui (findDeckCards cards player.hand)
         , h2 [] [ text "Deck" ]
         , button [ onClick (Draw 1) ] [ text "Draw" ]
         , deckView player.deck
@@ -402,6 +429,38 @@ cardView card =
         ]
 
 
+handView : Ui -> GameCards -> Html Msg
+handView ui cards =
+    let
+        singleView =
+            gameCardView ui
+    in
+        div [ style cardBoxStyle ]
+            (List.map singleView cards)
+
+
+gameCardView : Ui -> ( PieceId, Card ) -> Html Msg
+gameCardView { activeCard } ( id, card ) =
+    let
+        extraStyle =
+            case activeCard of
+                Just activeId ->
+                    if activeId == id then
+                        selectedStyle
+                    else
+                        []
+
+                Nothing ->
+                    []
+    in
+        div
+            [ style (cardStyle ++ extraStyle)
+            , onClick (SelectCard id)
+            ]
+            [ cardBar card
+            ]
+
+
 cardBar : Card -> Html Msg
 cardBar card =
     div [ style cardBarStyle ]
@@ -410,11 +469,10 @@ cardBar card =
         ]
 
 
-findDeckCards : Cards -> Deck -> Cards
+findDeckCards : Cards -> Deck -> GameCards
 findDeckCards cards deck =
     deck
-        |> List.map (\card -> card.card)
-        |> List.map (findCard cards)
+        |> List.map (\card -> ( card.id, findCard cards card.card ))
 
 
 findCard : Cards -> CardId -> Card
@@ -485,6 +543,12 @@ cardStyle =
     , ( "height", "180px" )
     , ( "width", "120px" )
     , ( "margin", "5px" )
+    ]
+
+
+selectedStyle : Style
+selectedStyle =
+    [ ( "background-color", "#aaaaaa" )
     ]
 
 
