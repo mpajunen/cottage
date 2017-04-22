@@ -300,7 +300,6 @@ gameView { board, cards, player } =
         , h2 [] [ text "Deck" ]
         , button [ onClick (Draw 1) ] [ text "Draw" ]
         , deckView player.deck
-        , cardList (findDeckCards cards player.deck)
         ]
 
 
@@ -409,39 +408,6 @@ cardBar card =
         [ div [ style cardTitleStyle ] [ text card.name ]
         , div [ style cardCostStyle ] [ text <| toString card.cost ]
         ]
-
-
-cardList : Cards -> Html Msg
-cardList cards =
-    table []
-        [ thead []
-            [ tableRow True cardFieldLabels ]
-        , tbody []
-            (List.map cardRow cards)
-        ]
-
-
-cardRow : Card -> Html Msg
-cardRow card =
-    card
-        |> getCardValues
-        |> tableRow False
-
-
-tableRow : Bool -> List String -> Html Msg
-tableRow header values =
-    tr []
-        (List.map (tableCell header) values)
-
-
-tableCell : Bool -> String -> Html Msg
-tableCell header value =
-    case header of
-        False ->
-            td [] [ text value ]
-
-        True ->
-            th [] [ text value ]
 
 
 findDeckCards : Cards -> Deck -> Cards
