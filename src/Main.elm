@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Array
+import Dict
 import Random
 import Random.Array
 
@@ -67,6 +68,32 @@ type alias Hand =
     List GameCard
 
 
+type alias Coordinate =
+    Int
+
+
+type alias Position =
+    ( Coordinate, Coordinate )
+
+
+type alias BoardCards =
+    Dict.Dict Position GameCard
+
+
+type alias BoardCell =
+    { position : Position
+    , card : Maybe GameCard
+    }
+
+
+type alias BoardRow =
+    List BoardCell
+
+
+type alias Board =
+    List BoardRow
+
+
 type alias Player =
     { deck : Deck
     , hand : Hand
@@ -86,6 +113,7 @@ type alias Rules =
 
 type alias Model =
     { cards : Cards
+    , board : BoardCards
     , player : Player
     , rules : Rules
     }
@@ -136,9 +164,15 @@ newPlayer =
     }
 
 
+emptyBoard : BoardCards
+emptyBoard =
+    Dict.empty
+
+
 initialModel : Model
 initialModel =
     { cards = someCards
+    , board = emptyBoard
     , player = newPlayer
     , rules = rules
     }
@@ -183,7 +217,12 @@ update msg model =
                 player =
                     initializePlayer model deck
             in
-                ( { model | player = player }, Cmd.none )
+                ( { model
+                    | board = emptyBoard
+                    , player = player
+                  }
+                , Cmd.none
+                )
 
         NoOp ->
             ( model, Cmd.none )
@@ -252,15 +291,89 @@ view model =
 
 
 gameView : Model -> Html Msg
-gameView { cards, player } =
+gameView { board, cards, player } =
     div [ style gameStyle ]
-        [ h2 [] [ text "Hand" ]
+        [ h2 [] [ text "Board" ]
+        , boardView cards board
+        , h2 [] [ text "Hand" ]
         , cardBox (findDeckCards cards player.hand)
         , h2 [] [ text "Deck" ]
         , button [ onClick (Draw 1) ] [ text "Draw" ]
         , deckView player.deck
         , cardList (findDeckCards cards player.deck)
         ]
+
+
+boardView : Cards -> BoardCards -> Html Msg
+boardView cards board =
+    let
+        drawCell =
+            boardCell cards
+
+        drawRow =
+            \row -> tr [] (List.map drawCell row)
+    in
+        table []
+            (board
+                |> getBoard
+                |> List.map drawRow
+            )
+
+
+boardCell : Cards -> BoardCell -> Html Msg
+boardCell cards cell =
+    let
+        content =
+            case cell.card of
+                Just { card } ->
+                    card
+                        |> findCard cards
+                        |> cardBar
+
+                Nothing ->
+                    text ""
+    in
+        td [ style slotStyle ] [ content ]
+
+
+getBoard : BoardCards -> Board
+getBoard cards =
+    let
+        getRange =
+            cards
+                |> Dict.keys
+                |> getBoardRange
+
+        xRange =
+            getRange (\( x, _ ) -> x)
+
+        yRange =
+            getRange (\( _, y ) -> y)
+
+        getCell x y =
+            { position = ( x, y )
+            , card = Dict.get ( x, y ) cards
+            }
+    in
+        yRange
+            |> List.map (\y -> List.map (\x -> getCell x y) xRange)
+
+
+getBoardRange : List Position -> (Position -> Coordinate) -> List Coordinate
+getBoardRange positions accessor =
+    let
+        getLimit =
+            List.map accessor positions
+                |> getBoardLimit
+    in
+        List.range (getLimit List.minimum -1) (getLimit List.maximum 1)
+
+
+getBoardLimit : List Coordinate -> (List Coordinate -> Maybe Coordinate) -> Int -> Coordinate
+getBoardLimit coordinates getLimit shift =
+    getLimit coordinates
+        |> Maybe.map ((+) shift)
+        |> Maybe.withDefault 0
 
 
 deckView : Deck -> Html Msg
@@ -426,4 +539,13 @@ cardTitleStyle : Style
 cardTitleStyle =
     [ ( "flex", "3 auto" )
     , ( "padding", "5px" )
+    ]
+
+
+slotStyle : Style
+slotStyle =
+    [ ( "border", "1px solid #555555" )
+    , ( "height", "60px" )
+    , ( "width", "120px" )
+    , ( "margin", "5px" )
     ]
