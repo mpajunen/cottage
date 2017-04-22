@@ -206,6 +206,7 @@ init =
 type Msg
     = NoOp
     | Draw Int
+    | PlayCard Position
     | SelectCard PieceId
     | StartGame
     | ReceiveDeck Deck
@@ -216,6 +217,18 @@ update msg model =
     case msg of
         Draw count ->
             ( { model | player = draw count model.player }, Cmd.none )
+
+        PlayCard position ->
+            let
+                newModel =
+                    case model.ui.activeCard of
+                        Just id ->
+                            playCard model id position
+
+                        Nothing ->
+                            model
+            in
+                ( newModel, Cmd.none )
 
         SelectCard id ->
             let
@@ -282,6 +295,27 @@ draw count player =
         | deck = List.drop count player.deck
         , hand = player.hand ++ (List.take count player.deck)
     }
+
+
+playCard : Model -> PieceId -> Position -> Model
+playCard model id position =
+    let
+        { board, player } =
+            model
+
+        ( cards, newHand ) =
+            List.partition (\card -> card.id == id) player.hand
+
+        newBoard =
+            List.foldl (Dict.insert position) board cards
+
+        newPlayer =
+            { player | hand = newHand }
+    in
+        { model
+            | board = newBoard
+            , player = newPlayer
+        }
 
 
 pickRandomCard : Cards -> Random.Generator Card
@@ -359,7 +393,11 @@ boardCell cards cell =
                 Nothing ->
                     text ""
     in
-        td [ style slotStyle ] [ content ]
+        td
+            [ style slotStyle
+            , onClick (PlayCard cell.position)
+            ]
+            [ content ]
 
 
 getBoard : BoardCards -> Board
