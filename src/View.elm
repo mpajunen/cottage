@@ -64,10 +64,18 @@ boardCell cards cell =
 
                 Nothing ->
                     text ""
+
+        playCard =
+            case cell.card of
+                Nothing ->
+                    PlayCard cell.position
+
+                _ ->
+                    NoOp
     in
         td
             [ style slotStyle
-            , onClick (PlayCard cell.position)
+            , onClick playCard
             ]
             [ content ]
 
