@@ -77,11 +77,16 @@ type alias Board =
     List BoardRow
 
 
+type alias Messages =
+    List Msg
+
+
 type alias Game =
     { activeCard : Maybe PieceId
     , board : BoardCards
     , deck : Deck
     , hand : Hand
+    , messages : Messages
     }
 
 
@@ -161,6 +166,7 @@ emptyGame =
     , board = emptyBoard
     , deck = []
     , hand = []
+    , messages = []
     }
 
 

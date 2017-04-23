@@ -18,9 +18,47 @@ view model =
         , button [ onClick StartGame ] [ text "Start game" ]
         , div [ style mainStyle ]
             [ gameView model
+            , messageView model.game.messages
             , cardsView model.cards
             ]
         ]
+
+
+messageView : Messages -> Html Msg
+messageView messages =
+    let
+        row message =
+            li [] [ text message ]
+
+        rows =
+            messages
+                |> List.filterMap printMessage
+                |> List.map row
+    in
+        div [ style messagesStyle ]
+            [ h2 [] [ text "Messages" ]
+            , ul [] rows
+            ]
+
+
+printMessage : Msg -> Maybe String
+printMessage msg =
+    case msg of
+        Draw count ->
+            Just (toString count ++ " cards drawn.")
+
+        InitGame deck ->
+            Just "Game started."
+
+        PlayCard position ->
+            Just "Card played."
+
+        SelectCard id ->
+            Nothing
+
+        _ ->
+            Nothing
+
 
 
 gameView : Model -> Html Msg
@@ -235,6 +273,12 @@ mainStyle =
 gameStyle : Style
 gameStyle =
     [ ( "flex", "3 auto" )
+    ]
+
+
+messagesStyle : Style
+messagesStyle =
+    [ ( "flex", "1 auto" )
     ]
 
 

@@ -46,8 +46,14 @@ updateGame model msg =
     let
         game =
             playGame model msg
+                |> addGameMessage msg
     in
         ( { model | game = game }, Cmd.none )
+
+
+addGameMessage : Msg -> Game -> Game
+addGameMessage msg game =
+    { game | messages = game.messages ++ [ msg ] }
 
 
 playGame : Model -> Msg -> Game
@@ -118,7 +124,6 @@ playCard game id position =
 
         newBoard =
             List.foldl (Dict.insert position) board cards
-
     in
         { game
             | board = newBoard
