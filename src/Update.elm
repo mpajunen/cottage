@@ -7,19 +7,6 @@ import Random.Array
 import Model exposing (..)
 
 
--- MESSAGE STRUCTURE
-
-
-type Msg
-    = NoOp
-    | Draw Int
-    | PlayCard Position
-    | SelectCard PieceId
-    | StartGame
-    | ReceiveDeck Deck
-
-
-
 -- ACTIONS
 
 
@@ -27,29 +14,16 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Draw count ->
-            ( { model | player = draw count model.player }, Cmd.none )
+            updateGame model msg
+
+        InitGame deck ->
+            updateGame model msg
 
         PlayCard position ->
-            let
-                newModel =
-                    case model.ui.activeCard of
-                        Just id ->
-                            playCard model id position
-
-                        Nothing ->
-                            model
-            in
-                ( newModel, Cmd.none )
+            updateGame model msg
 
         SelectCard id ->
-            let
-                { ui } =
-                    model
-
-                updatedUi =
-                    { ui | activeCard = Just id }
-            in
-                ( { model | ui = updatedUi }, Cmd.none )
+            updateGame model msg
 
         StartGame ->
             let
@@ -59,33 +33,58 @@ update msg model =
                 deckGenerator =
                     createDeck rules.deck cards
             in
-                ( { model | player = newPlayer }
-                , Random.generate ReceiveDeck deckGenerator
-                )
-
-        ReceiveDeck deck ->
-            let
-                player =
-                    initializePlayer model deck
-            in
-                ( { model
-                    | board = emptyBoard
-                    , player = player
-                  }
-                , Cmd.none
+                ( { model | game = emptyGame }
+                , Random.generate InitGame deckGenerator
                 )
 
         NoOp ->
             ( model, Cmd.none )
 
 
-initializePlayer : Model -> Deck -> Player
-initializePlayer { player, rules } deck =
+updateGame : Model -> Msg -> ( Model, Cmd Msg )
+updateGame model msg =
+    let
+        game =
+            playGame model msg
+    in
+        ( { model | game = game }, Cmd.none )
+
+
+playGame : Model -> Msg -> Game
+playGame model msg =
+    let
+        { game } =
+            model
+    in
+        case msg of
+            Draw count ->
+                draw count game
+
+            PlayCard position ->
+                case game.activeCard of
+                    Just id ->
+                        playCard game id position
+
+                    Nothing ->
+                        game
+
+            SelectCard id ->
+                { game | activeCard = Just id }
+
+            InitGame deck ->
+                initializeGame model deck
+
+            _ ->
+                game
+
+
+initializeGame : Model -> Deck -> Game
+initializeGame { game, rules } deck =
     let
         initialDraw =
             draw rules.initialDraw
     in
-        { player | deck = deck }
+        { game | deck = deck }
             |> initialDraw
 
 
@@ -100,32 +99,30 @@ createDeck { cardCount } cards =
             |> Random.map (List.indexedMap GameCard)
 
 
-draw : Int -> Player -> Player
-draw count player =
-    { player
-        | deck = List.drop count player.deck
-        , hand = player.hand ++ (List.take count player.deck)
+draw : Int -> Game -> Game
+draw count game =
+    { game
+        | deck = List.drop count game.deck
+        , hand = game.hand ++ (List.take count game.deck)
     }
 
 
-playCard : Model -> PieceId -> Position -> Model
-playCard model id position =
+playCard : Game -> PieceId -> Position -> Game
+playCard game id position =
     let
-        { board, player } =
-            model
+        { board, hand } =
+            game
 
         ( cards, newHand ) =
-            List.partition (\card -> card.id == id) player.hand
+            List.partition (\card -> card.id == id) hand
 
         newBoard =
             List.foldl (Dict.insert position) board cards
 
-        newPlayer =
-            { player | hand = newHand }
     in
-        { model
+        { game
             | board = newBoard
-            , player = newPlayer
+            , hand = newHand
         }
 
 

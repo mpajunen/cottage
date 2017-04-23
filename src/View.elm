@@ -24,15 +24,15 @@ view model =
 
 
 gameView : Model -> Html Msg
-gameView { board, cards, player, ui } =
+gameView { cards, game } =
     div [ style gameStyle ]
         [ h2 [] [ text "Board" ]
-        , boardView cards board
+        , boardView cards game.board
         , h2 [] [ text "Hand" ]
-        , handView ui (findDeckCards cards player.hand)
+        , handView game (findDeckCards cards game.hand)
         , h2 [] [ text "Deck" ]
         , button [ onClick (Draw 1) ] [ text "Draw" ]
-        , deckView player.deck
+        , deckView game.deck
         ]
 
 
@@ -147,17 +147,17 @@ cardView card =
         ]
 
 
-handView : Ui -> GameCards -> Html Msg
-handView ui cards =
+handView : Game -> GameCards -> Html Msg
+handView game cards =
     let
         singleView =
-            gameCardView ui
+            gameCardView game
     in
         div [ style cardBoxStyle ]
             (List.map singleView cards)
 
 
-gameCardView : Ui -> ( PieceId, Card ) -> Html Msg
+gameCardView : Game -> ( PieceId, Card ) -> Html Msg
 gameCardView { activeCard } ( id, card ) =
     let
         extraStyle =

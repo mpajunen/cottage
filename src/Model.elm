@@ -77,8 +77,10 @@ type alias Board =
     List BoardRow
 
 
-type alias Player =
-    { deck : Deck
+type alias Game =
+    { activeCard : Maybe PieceId
+    , board : BoardCards
+    , deck : Deck
     , hand : Hand
     }
 
@@ -94,17 +96,19 @@ type alias Rules =
     }
 
 
-type alias Ui =
-    { activeCard : Maybe PieceId
-    }
+type Msg
+    = NoOp
+    | Draw Int
+    | PlayCard Position
+    | SelectCard PieceId
+    | StartGame
+    | InitGame Deck
 
 
 type alias Model =
     { cards : Cards
-    , board : BoardCards
-    , player : Player
+    , game : Game
     , rules : Rules
-    , ui : Ui
     }
 
 
@@ -146,28 +150,23 @@ rules =
     }
 
 
-newPlayer : Player
-newPlayer =
-    { deck = []
-    , hand = []
-    }
-
-
 emptyBoard : BoardCards
 emptyBoard =
     Dict.empty
 
 
-initialUi =
+emptyGame : Game
+emptyGame =
     { activeCard = Nothing
+    , board = emptyBoard
+    , deck = []
+    , hand = []
     }
 
 
 initialModel : Model
 initialModel =
     { cards = someCards
-    , board = emptyBoard
-    , player = newPlayer
+    , game = emptyGame
     , rules = rules
-    , ui = initialUi
     }
