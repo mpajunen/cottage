@@ -242,18 +242,6 @@ findCard cards id =
         Maybe.withDefault invalidCard card
 
 
-getCardValues : Card -> List String
-getCardValues { name, cost } =
-    [ name
-    , toString cost
-    ]
-
-
-cardFieldLabels : List String
-cardFieldLabels =
-    [ "Name"
-    , "Cost"
-    ]
 
 
 
