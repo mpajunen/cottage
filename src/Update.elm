@@ -16,6 +16,9 @@ update msg model =
         Draw count ->
             updateGame model msg
 
+        EndTurn ->
+            updateGame model msg
+
         InitGame deck ->
             updateGame model msg
 
@@ -66,6 +69,9 @@ playGame model msg =
             Draw count ->
                 draw count game
 
+            EndTurn ->
+                endTurn game
+
             PlayCard position ->
                 case game.activeCard of
                     Just id ->
@@ -113,21 +119,52 @@ draw count game =
     }
 
 
+endTurn : Game -> Game
+endTurn game =
+    let
+        { turns } =
+            game
+
+        newTurns =
+            { turns
+                | current =
+                    { round = turns.current.round + 1
+                    , plays = []
+                    }
+                , history = turns.history ++ [ turns.current ]
+            }
+    in
+        { game | turns = newTurns }
+
+
 playCard : Game -> PieceId -> Position -> Game
 playCard game id position =
     let
-        { board, hand } =
+        { board, hand, turns } =
             game
+
+        { current } =
+            turns
 
         ( cards, newHand ) =
             List.partition (\card -> card.id == id) hand
 
         newBoard =
             List.foldl (Dict.insert position) board cards
+
+        newPlay =
+            { card = id, position = position }
+
+        plays =
+            current.plays ++ [ newPlay ]
+
+        newTurns =
+            { turns | current = { current | plays = plays } }
     in
         { game
             | board = newBoard
             , hand = newHand
+            , turns = newTurns
         }
 
 

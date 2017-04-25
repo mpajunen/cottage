@@ -77,6 +77,32 @@ type alias Board =
     List BoardRow
 
 
+type alias Play =
+    { card : PieceId
+    , position : Position
+    }
+
+
+type alias RoundNumber =
+    Int
+
+
+type alias Turn =
+    { plays : List Play
+    , round : RoundNumber
+    }
+
+
+type alias TurnHistory =
+    List Turn
+
+
+type alias Turns =
+    { current : Turn
+    , history : TurnHistory
+    }
+
+
 type alias Messages =
     List Msg
 
@@ -87,6 +113,7 @@ type alias Game =
     , deck : Deck
     , hand : Hand
     , messages : Messages
+    , turns : Turns
     }
 
 
@@ -104,6 +131,7 @@ type alias Rules =
 type Msg
     = NoOp
     | Draw Int
+    | EndTurn
     | PlayCard Position
     | SelectCard PieceId
     | StartGame
@@ -160,6 +188,23 @@ emptyBoard =
     Dict.empty
 
 
+firstTurn : Turn
+firstTurn =
+    { plays = []
+    , round = 1
+    }
+
+
+initialTurns : Turns
+initialTurns =
+    { current =
+        { plays = []
+        , round = 1
+        }
+    , history = []
+    }
+
+
 emptyGame : Game
 emptyGame =
     { activeCard = Nothing
@@ -167,6 +212,7 @@ emptyGame =
     , deck = []
     , hand = []
     , messages = []
+    , turns = initialTurns
     }
 
 

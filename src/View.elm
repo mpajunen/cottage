@@ -16,12 +16,59 @@ view model =
     div []
         [ h1 [] [ text "Cottage" ]
         , button [ onClick StartGame ] [ text "Start game" ]
+        , button [ onClick EndTurn ] [ text "End turn" ]
         , div [ style mainStyle ]
             [ gameView model
+            , turnsView model
             , messageView model.game.messages
             , cardsView model.cards
             ]
         ]
+
+
+turnsView : Model -> Html Msg
+turnsView { game } =
+    let
+        { turns } =
+            game
+
+        allTurns =
+            [ turns.current ] ++ (List.reverse turns.history)
+
+        rows =
+            allTurns
+                |> List.map turnView
+    in
+        div [ style messagesStyle ]
+            [ h2 [] [ text "Turns" ]
+            , div [] rows
+            ]
+
+
+turnView : Turn -> Html Msg
+turnView turn =
+    let
+        playText : Play -> String
+        playText { card, position } =
+            "#" ++ toString card ++ " " ++ showPosition position
+
+        plays =
+            if turn.plays == [] then
+                "No cards"
+            else
+                turn.plays
+                    |> List.map playText
+                    |> String.join ", "
+    in
+        div []
+            [ h4 [] [ text ("Turn " ++ toString turn.round) ]
+            , div [] [ text (plays ++ " played.") ]
+            ]
+
+
+showPosition : Position -> String
+showPosition ( x, y ) =
+    "(" ++ toString x ++ ", " ++ toString y ++ ")"
 
 
 messageView : Messages -> Html Msg
@@ -47,6 +94,9 @@ printMessage msg =
         Draw count ->
             Just (toString count ++ " cards drawn.")
 
+        EndTurn ->
+            Just "Turn ended."
+
         InitGame deck ->
             Just "Game started."
 
@@ -58,7 +108,6 @@ printMessage msg =
 
         _ ->
             Nothing
-
 
 
 gameView : Model -> Html Msg
