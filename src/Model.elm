@@ -112,6 +112,7 @@ type alias DeckRules =
 type alias Rules =
     { deck : DeckRules
     , initialDraw : CardCount
+    , roundDraw : CardCount
     }
 
 
@@ -167,6 +168,7 @@ rules =
         { cardCount = 30
         }
     , initialDraw = 5
+    , roundDraw = 3
     }
 
 

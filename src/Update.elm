@@ -62,7 +62,7 @@ addGameMessage msg game =
 playGame : Model -> Msg -> Game
 playGame model msg =
     let
-        { game } =
+        { game, rules } =
             model
     in
         case msg of
@@ -71,6 +71,7 @@ playGame model msg =
 
             EndTurn ->
                 endTurn game
+                    |> draw rules.roundDraw
 
             PlayCard position ->
                 case game.activeCard of
