@@ -19,7 +19,7 @@ update msg model =
         EndTurn ->
             updateGame model msg
 
-        InitGame deck ->
+        InitGame cards ->
             updateGame model msg
 
         PlayCard position ->
@@ -91,14 +91,14 @@ playGame model msg =
                 game
 
 
-initializeGame : Model -> Deck -> Game
-initializeGame { game, rules } deck =
+initializeGame : Model -> List GameCard -> Game
+initializeGame { game, rules } cards =
     let
         getCardPair { id, card } =
             ( id, card )
 
-        cards =
-            deck
+        cardMap =
+            cards
                 |> List.map getCardPair
                 |> Dict.fromList
 
@@ -106,18 +106,18 @@ initializeGame { game, rules } deck =
             draw rules.initialDraw
     in
         { game
-            | cards = cards
-            , deck = deck
+            | cards = cardMap
+            , deck = List.map .id cards
         }
             |> initialDraw
 
 
-createDeck : DeckRules -> Cards -> Random.Generator Deck
+createDeck : DeckRules -> Cards -> Random.Generator (List GameCard)
 createDeck { cardCount } cards =
     let
         pick =
             pickRandomCard cards
-                |> Random.map (\card -> card.id)
+                |> Random.map .id
     in
         Random.list cardCount pick
             |> Random.map (List.indexedMap GameCard)
@@ -136,7 +136,7 @@ draw count game =
             List.take count game.deck
 
         newTurn =
-            { turn | draws = turn.draws ++ List.map .id draws }
+            { turn | draws = turn.draws ++ draws }
     in
         { game
             | deck = List.drop count game.deck
@@ -177,7 +177,7 @@ playCard game id position =
             turns
 
         ( cards, newHand ) =
-            List.partition (\card -> card.id == id) hand
+            List.partition (\card -> card == id) hand
 
         newBoard =
             List.foldl (Dict.insert position) board cards

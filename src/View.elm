@@ -51,16 +51,22 @@ type alias TurnView =
     }
 
 
-buildBoard : Cards -> BoardCards -> Board
-buildBoard allCards gameCards =
+buildBoard : Model -> Board
+buildBoard model =
     let
+        { game } =
+            model
+
         getRange =
-            gameCards
+            game.board
                 |> Dict.keys
                 |> getBoardRange
 
+        buildCard _ id =
+            CardView id (findPieceCard model id)
+
         cards =
-            Dict.map (\_ -> buildCard allCards) gameCards
+            Dict.map buildCard game.board
 
         xRange =
             getRange (\( x, _ ) -> x)
@@ -77,30 +83,22 @@ buildBoard allCards gameCards =
             |> List.map (\y -> List.map (\x -> getCell x y) xRange)
 
 
-buildCard : Cards -> GameCard -> CardView
-buildCard cards { id, card } =
-    { id = id
-    , card = findCard cards card
-    }
-
-
 buildGame : Model -> GameView
 buildGame model =
     let
         { cards, game } =
             model
 
-        buildCards : List GameCard -> List CardView
-        buildCards =
-            List.map (buildCard cards)
+        buildCard id =
+            CardView id (findPieceCard model id)
 
         allTurns =
             [ game.turns.current ] ++ List.reverse game.turns.history
     in
         { activeCard = game.activeCard
-        , board = buildBoard cards game.board
-        , deck = buildCards game.deck
-        , hand = buildCards game.hand
+        , board = buildBoard model
+        , deck = List.map buildCard game.deck
+        , hand = List.map buildCard game.hand
         , messages = game.messages
         , turns = List.map (buildTurn model) allTurns
         }

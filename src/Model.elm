@@ -44,11 +44,11 @@ type alias GameCards =
 
 
 type alias Deck =
-    List GameCard
+    List PieceId
 
 
 type alias Hand =
-    List GameCard
+    List PieceId
 
 
 type alias Coordinate =
@@ -60,7 +60,7 @@ type alias Position =
 
 
 type alias BoardCards =
-    Dict.Dict Position GameCard
+    Dict.Dict Position PieceId
 
 
 type alias Play =
@@ -124,7 +124,7 @@ type Msg
     | PlayCard Position
     | SelectCard PieceId
     | StartGame
-    | InitGame Deck
+    | InitGame (List GameCard)
 
 
 type alias Model =
