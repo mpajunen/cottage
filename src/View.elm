@@ -79,6 +79,7 @@ buildBoard model =
             }
     in
         yRange
+            |> List.reverse
             |> List.map (\y -> List.map (\x -> getCell x y) xRange)
 
 
@@ -269,9 +270,18 @@ boardCell cell =
 
                 _ ->
                     NoOp
+
+        ( _, y ) =
+            cell.position
+
+        groundStyle =
+            if y < 0 then
+                undergroundStyle
+            else
+                []
     in
         td
-            [ style slotStyle
+            [ style (slotStyle ++ groundStyle)
             , onClick playCard
             ]
             [ content ]
@@ -433,4 +443,10 @@ slotStyle =
     , ( "height", "60px" )
     , ( "width", "120px" )
     , ( "margin", "5px" )
+    ]
+
+
+undergroundStyle : Style
+undergroundStyle =
+    [ ( "background-color", "#888888" )
     ]
