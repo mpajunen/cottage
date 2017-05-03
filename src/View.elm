@@ -139,8 +139,8 @@ turnView : TurnView -> Html Msg
 turnView turn =
     let
         playText : PlayView -> String
-        playText { id, position } =
-            "#" ++ toString id ++ " " ++ showPosition position
+        playText { card, id, position } =
+            card.name ++ " #" ++ toString id ++ " " ++ showPosition position
 
         plays =
             if turn.plays == [] then
