@@ -235,7 +235,6 @@ gameView model =
         , h2 [] [ text "Hand" ]
         , handView model
         , h2 [] [ text "Deck" ]
-        , button [ onClick (Draw 1) ] [ text "Draw" ]
         , deckView model.deck
         ]
 

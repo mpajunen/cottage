@@ -13,9 +13,6 @@ import Model exposing (..)
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Draw count ->
-            updateGame model msg
-
         EndTurn ->
             updateGame model msg
 
@@ -60,9 +57,6 @@ playGame model msg =
             model
     in
         case msg of
-            Draw count ->
-                draw count game
-
             EndTurn ->
                 endTurn game
                     |> draw rules.roundDraw

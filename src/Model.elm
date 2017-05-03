@@ -114,7 +114,6 @@ type alias Rules =
 
 type Msg
     = NoOp
-    | Draw Int
     | EndTurn
     | PlayCard Position
     | SelectCard PieceId
