@@ -45,7 +45,8 @@ type alias PlayView =
 
 
 type alias TurnView =
-    { plays : List PlayView
+    { draws : List CardView
+    , plays : List PlayView
     , round : RoundNumber
     }
 
@@ -103,16 +104,17 @@ buildCard cards { id, card } =
 
 
 buildTurn : Model -> Turn -> TurnView
-buildTurn model { round, plays } =
+buildTurn model { draws, plays, round } =
     let
+        buildDraw id =
+            CardView id (findPieceCard model id)
+
         buildPlay { card, position } =
-            { id = card
-            , card = findPieceCard model card
-            , position = position
-            }
+            PlayView card (findPieceCard model card) position
     in
-        { round = round
+        { draws = List.map buildDraw draws
         , plays = List.map buildPlay plays
+        , round = round
         }
 
 
@@ -138,6 +140,18 @@ turnsView turns =
 turnView : TurnView -> Html Msg
 turnView turn =
     let
+        cardText : CardView -> String
+        cardText { card, id } =
+            card.name ++ " #" ++ toString id
+
+        draws =
+            if turn.draws == [] then
+                "No cards"
+            else
+                turn.draws
+                    |> List.map cardText
+                    |> String.join ", "
+
         playText : PlayView -> String
         playText { card, id, position } =
             card.name ++ " #" ++ toString id ++ " " ++ showPosition position
@@ -152,6 +166,7 @@ turnView turn =
     in
         div []
             [ h4 [] [ text ("Turn " ++ toString turn.round) ]
+            , div [] [ text (draws ++ " drawn.") ]
             , div [] [ text (plays ++ " played.") ]
             ]
 

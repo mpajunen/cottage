@@ -74,7 +74,8 @@ type alias RoundNumber =
 
 
 type alias Turn =
-    { plays : List Play
+    { draws : List PieceId
+    , plays : List Play
     , round : RoundNumber
     }
 
@@ -179,17 +180,15 @@ emptyBoard =
 
 firstTurn : Turn
 firstTurn =
-    { plays = []
+    { draws = []
+    , plays = []
     , round = 1
     }
 
 
 initialTurns : Turns
 initialTurns =
-    { current =
-        { plays = []
-        , round = 1
-        }
+    { current = firstTurn
     , history = []
     }
 

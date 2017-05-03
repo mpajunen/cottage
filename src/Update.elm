@@ -125,10 +125,24 @@ createDeck { cardCount } cards =
 
 draw : Int -> Game -> Game
 draw count game =
-    { game
-        | deck = List.drop count game.deck
-        , hand = game.hand ++ (List.take count game.deck)
-    }
+    let
+        { turns } =
+            game
+
+        turn =
+            turns.current
+
+        draws =
+            List.take count game.deck
+
+        newTurn =
+            { turn | draws = turn.draws ++ List.map .id draws }
+    in
+        { game
+            | deck = List.drop count game.deck
+            , hand = game.hand ++ draws
+            , turns = { turns | current = newTurn }
+        }
 
 
 endTurn : Game -> Game
@@ -137,13 +151,17 @@ endTurn game =
         { turns } =
             game
 
+        turn =
+            turns.current
+
         newTurns =
             { turns
                 | current =
-                    { round = turns.current.round + 1
+                    { draws = []
                     , plays = []
+                    , round = turn.round + 1
                     }
-                , history = turns.history ++ [ turns.current ]
+                , history = turns.history ++ [ turn ]
             }
     in
         { game | turns = newTurns }
