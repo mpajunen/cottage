@@ -167,9 +167,6 @@ playCard game id position =
         ( cards, newHand ) =
             List.partition (\card -> card == id) hand
 
-        newBoard =
-            List.foldl (Dict.insert position) board cards
-
         newPlay =
             { card = id, position = position }
 
@@ -180,7 +177,7 @@ playCard game id position =
             { turns | current = { current | plays = plays } }
     in
         { game
-            | board = newBoard
+            | board = board ++ [ newPlay ]
             , hand = newHand
             , turns = newTurns
         }

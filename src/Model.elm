@@ -56,11 +56,9 @@ type alias Coordinate =
 
 
 type alias Position =
-    ( Coordinate, Coordinate )
-
-
-type alias BoardCards =
-    Dict.Dict Position PieceId
+    { x : Coordinate
+    , y : Coordinate
+    }
 
 
 type alias Play =
@@ -93,7 +91,7 @@ type alias Turns =
 type alias Game =
     { activeCard : Maybe PieceId
     , cards : GameCards
-    , board : BoardCards
+    , board : List Play
     , deck : Deck
     , hand : Hand
     , turns : Turns
@@ -167,11 +165,6 @@ rules =
     }
 
 
-emptyBoard : BoardCards
-emptyBoard =
-    Dict.empty
-
-
 firstTurn : Turn
 firstTurn =
     { draws = []
@@ -190,7 +183,7 @@ initialTurns =
 emptyGame : Game
 emptyGame =
     { activeCard = Nothing
-    , board = emptyBoard
+    , board = []
     , cards = Dict.empty
     , deck = []
     , hand = []

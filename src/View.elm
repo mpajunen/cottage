@@ -58,29 +58,28 @@ buildBoard model =
 
         getRange =
             game.board
-                |> Dict.keys
+                |> List.map .position
                 |> getBoardRange
 
-        buildCard _ id =
+        buildPosition { x, y } =
+            ( x, y )
+
+        buildCard id =
             CardView id (findPieceCard model id)
 
         cards =
-            Dict.map buildCard game.board
+            game.board
+                |> List.map (\p -> ( buildPosition p.position, buildCard p.card ))
+                |> Dict.fromList
 
-        xRange =
-            getRange (\( x, _ ) -> x)
-
-        yRange =
-            getRange (\( _, y ) -> y)
-
-        getCell x y =
-            { position = ( x, y )
+        getCell y x =
+            { position = { x = x, y = y }
             , card = Dict.get ( x, y ) cards
             }
     in
-        yRange
+        getRange .y
             |> List.reverse
-            |> List.map (\y -> List.map (\x -> getCell x y) xRange)
+            |> List.map (\y -> List.map (getCell y) (getRange .x))
 
 
 buildGame : Model -> GameView
@@ -224,7 +223,7 @@ playText { card, id, position } =
 
 
 positionText : Position -> String
-positionText ( x, y ) =
+positionText { x, y } =
     "(" ++ toString x ++ ", " ++ toString y ++ ")"
 
 
@@ -271,7 +270,7 @@ boardCell cell =
                 _ ->
                     NoOp
 
-        ( _, y ) =
+        { y } =
             cell.position
 
         groundStyle =
