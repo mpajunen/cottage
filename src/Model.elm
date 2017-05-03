@@ -59,20 +59,6 @@ type alias BoardCards =
     Dict.Dict Position GameCard
 
 
-type alias BoardCell =
-    { position : Position
-    , card : Maybe GameCard
-    }
-
-
-type alias BoardRow =
-    List BoardCell
-
-
-type alias Board =
-    List BoardRow
-
-
 type alias Play =
     { card : PieceId
     , position : Position

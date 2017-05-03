@@ -8,30 +8,87 @@ import Model exposing (..)
 import Update exposing (..)
 
 
+-- VIEW STRUCTURE
+
+
+type alias Board =
+    List (List BoardCell)
+
+
+type alias BoardCell =
+    { position : Position
+    , card : Maybe CardView
+    }
+
+
+type alias CardView =
+    { id : PieceId
+    , card : Card
+    }
+
+
+type alias GameView =
+    { activeCard : Maybe PieceId
+    , board : Board
+    , deck : List CardView
+    , hand : List CardView
+    , messages : Messages
+    , turns : Turns
+    }
+
+
+
 -- VIEW
 
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h1 [] [ text "Cottage" ]
-        , button [ onClick StartGame ] [ text "Start game" ]
-        , button [ onClick EndTurn ] [ text "End turn" ]
-        , div [ style mainStyle ]
-            [ gameView model
-            , turnsView model
-            , messageView model.game.messages
-            , cardsView model.cards
-            ]
-        ]
-
-
-turnsView : Model -> Html Msg
-turnsView { game } =
     let
-        { turns } =
-            game
+        gameModel =
+            buildGameView model
+    in
+        div []
+            [ h1 [] [ text "Cottage" ]
+            , button [ onClick StartGame ] [ text "Start game" ]
+            , button [ onClick EndTurn ] [ text "End turn" ]
+            , div [ style mainStyle ]
+                [ gameView gameModel
+                , turnsView gameModel.turns
+                , messageView gameModel.messages
+                , cardsView model.cards
+                ]
+            ]
 
+
+buildGameView : Model -> GameView
+buildGameView model =
+    let
+        { cards, game } =
+            model
+
+        buildCards : List GameCard -> List CardView
+        buildCards =
+            List.map (buildCard cards)
+    in
+        { activeCard = game.activeCard
+        , board = getBoard cards game.board
+        , deck = buildCards game.deck
+        , hand = buildCards game.hand
+        , messages = game.messages
+        , turns = game.turns
+        }
+
+
+buildCard : Cards -> GameCard -> CardView
+buildCard cards { id, card } =
+    { id = id
+    , card = findCard cards card
+    }
+
+
+turnsView : Turns -> Html Msg
+turnsView turns =
+    let
         allTurns =
             [ turns.current ] ++ (List.reverse turns.history)
 
@@ -110,44 +167,38 @@ printMessage msg =
             Nothing
 
 
-gameView : Model -> Html Msg
-gameView { cards, game } =
+gameView : GameView -> Html Msg
+gameView model =
     div [ style gameStyle ]
         [ h2 [] [ text "Board" ]
-        , boardView cards game.board
+        , boardView model.board
         , h2 [] [ text "Hand" ]
-        , handView cards game
+        , handView model
         , h2 [] [ text "Deck" ]
         , button [ onClick (Draw 1) ] [ text "Draw" ]
-        , deckView game.deck
+        , deckView model.deck
         ]
 
 
-boardView : Cards -> BoardCards -> Html Msg
-boardView cards board =
+boardView : Board -> Html Msg
+boardView board =
     let
-        drawCell =
-            boardCell cards
-
         drawRow =
-            \row -> tr [] (List.map drawCell row)
+            \row -> tr [] (List.map boardCell row)
     in
         table []
             (board
-                |> getBoard
                 |> List.map drawRow
             )
 
 
-boardCell : Cards -> BoardCell -> Html Msg
-boardCell cards cell =
+boardCell : BoardCell -> Html Msg
+boardCell cell =
     let
         content =
             case cell.card of
                 Just { card } ->
-                    card
-                        |> findCard cards
-                        |> cardBar
+                    cardBar card
 
                 Nothing ->
                     text ""
@@ -167,13 +218,16 @@ boardCell cards cell =
             [ content ]
 
 
-getBoard : BoardCards -> Board
-getBoard cards =
+getBoard : Cards -> BoardCards -> Board
+getBoard allCards gameCards =
     let
         getRange =
-            cards
+            gameCards
                 |> Dict.keys
                 |> getBoardRange
+
+        cards =
+            Dict.map (\_ -> buildCard allCards) gameCards
 
         xRange =
             getRange (\( x, _ ) -> x)
@@ -207,7 +261,7 @@ getBoardLimit coordinates getLimit shift =
         |> Maybe.withDefault 0
 
 
-deckView : Deck -> Html Msg
+deckView : List CardView -> Html Msg
 deckView deck =
     div [ style deckStyle ]
         [ text ("(" ++ (toString <| List.length deck) ++ ")") ]
@@ -234,23 +288,21 @@ cardView card =
         ]
 
 
-handView : Cards -> Game -> Html Msg
-handView cards game =
+handView : GameView -> Html Msg
+handView model =
     let
         singleView =
-            gameCardView game
+            gameCardView model
 
         handCards =
-            game.hand
-                |> List.map (\card -> ( card.id, findCard cards card.card ))
-                |> List.map singleView
+            List.map singleView model.hand
     in
         div [ style cardBoxStyle ]
             handCards
 
 
-gameCardView : Game -> ( PieceId, Card ) -> Html Msg
-gameCardView { activeCard } ( id, card ) =
+gameCardView : GameView -> CardView -> Html Msg
+gameCardView { activeCard } { id, card } =
     let
         extraStyle =
             case activeCard of
