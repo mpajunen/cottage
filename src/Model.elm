@@ -90,17 +90,12 @@ type alias Turns =
     }
 
 
-type alias Messages =
-    List Msg
-
-
 type alias Game =
     { activeCard : Maybe PieceId
     , cards : GameCards
     , board : BoardCards
     , deck : Deck
     , hand : Hand
-    , messages : Messages
     , turns : Turns
     }
 
@@ -200,7 +195,6 @@ emptyGame =
     , cards = Dict.empty
     , deck = []
     , hand = []
-    , messages = []
     , turns = initialTurns
     }
 

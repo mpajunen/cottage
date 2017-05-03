@@ -32,7 +32,6 @@ type alias GameView =
     , board : Board
     , deck : List CardView
     , hand : List CardView
-    , messages : Messages
     , turns : List TurnView
     }
 
@@ -99,7 +98,6 @@ buildGame model =
         , board = buildBoard model
         , deck = List.map buildCard game.deck
         , hand = List.map buildCard game.hand
-        , messages = game.messages
         , turns = List.map (buildTurn model) allTurns
         }
 
@@ -171,7 +169,6 @@ view model =
             , div [ style mainStyle ]
                 [ gameView gameModel
                 , turnsView gameModel.turns
-                , messageView gameModel.messages
                 , cardsView model.cards
                 ]
             ]
@@ -183,7 +180,7 @@ turnsView turns =
         rows =
             List.map turnView turns
     in
-        div [ style messagesStyle ]
+        div [ style cardsStyle ]
             [ h2 [] [ text "Turns" ]
             , div [] rows
             ]
@@ -228,45 +225,6 @@ playText { card, id, position } =
 positionText : Position -> String
 positionText ( x, y ) =
     "(" ++ toString x ++ ", " ++ toString y ++ ")"
-
-
-messageView : Messages -> Html Msg
-messageView messages =
-    let
-        row message =
-            li [] [ text message ]
-
-        rows =
-            messages
-                |> List.filterMap printMessage
-                |> List.map row
-    in
-        div [ style messagesStyle ]
-            [ h2 [] [ text "Messages" ]
-            , ul [] rows
-            ]
-
-
-printMessage : Msg -> Maybe String
-printMessage msg =
-    case msg of
-        Draw count ->
-            Just (toString count ++ " cards drawn.")
-
-        EndTurn ->
-            Just "Turn ended."
-
-        InitGame deck ->
-            Just "Game started."
-
-        PlayCard position ->
-            Just "Card played."
-
-        SelectCard id ->
-            Nothing
-
-        _ ->
-            Nothing
 
 
 gameView : GameView -> Html Msg
@@ -407,12 +365,6 @@ mainStyle =
 gameStyle : Style
 gameStyle =
     [ ( "flex", "3 auto" )
-    ]
-
-
-messagesStyle : Style
-messagesStyle =
-    [ ( "flex", "1 auto" )
     ]
 
 

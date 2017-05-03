@@ -49,14 +49,8 @@ updateGame model msg =
     let
         game =
             playGame model msg
-                |> addGameMessage msg
     in
         ( { model | game = game }, Cmd.none )
-
-
-addGameMessage : Msg -> Game -> Game
-addGameMessage msg game =
-    { game | messages = game.messages ++ [ msg ] }
 
 
 playGame : Model -> Msg -> Game
