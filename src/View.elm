@@ -51,31 +51,41 @@ type alias TurnView =
     }
 
 
-
--- VIEW
-
-
-view : Model -> Html Msg
-view model =
+buildBoard : Cards -> BoardCards -> Board
+buildBoard allCards gameCards =
     let
-        gameModel =
-            buildGameView model
+        getRange =
+            gameCards
+                |> Dict.keys
+                |> getBoardRange
+
+        cards =
+            Dict.map (\_ -> buildCard allCards) gameCards
+
+        xRange =
+            getRange (\( x, _ ) -> x)
+
+        yRange =
+            getRange (\( _, y ) -> y)
+
+        getCell x y =
+            { position = ( x, y )
+            , card = Dict.get ( x, y ) cards
+            }
     in
-        div []
-            [ h1 [] [ text "Cottage" ]
-            , button [ onClick StartGame ] [ text "Start game" ]
-            , button [ onClick EndTurn ] [ text "End turn" ]
-            , div [ style mainStyle ]
-                [ gameView gameModel
-                , turnsView gameModel.turns
-                , messageView gameModel.messages
-                , cardsView model.cards
-                ]
-            ]
+        yRange
+            |> List.map (\y -> List.map (\x -> getCell x y) xRange)
 
 
-buildGameView : Model -> GameView
-buildGameView model =
+buildCard : Cards -> GameCard -> CardView
+buildCard cards { id, card } =
+    { id = id
+    , card = findCard cards card
+    }
+
+
+buildGame : Model -> GameView
+buildGame model =
     let
         { cards, game } =
             model
@@ -88,19 +98,12 @@ buildGameView model =
             [ game.turns.current ] ++ List.reverse game.turns.history
     in
         { activeCard = game.activeCard
-        , board = getBoard cards game.board
+        , board = buildBoard cards game.board
         , deck = buildCards game.deck
         , hand = buildCards game.hand
         , messages = game.messages
         , turns = List.map (buildTurn model) allTurns
         }
-
-
-buildCard : Cards -> GameCard -> CardView
-buildCard cards { id, card } =
-    { id = id
-    , card = findCard cards card
-    }
 
 
 buildTurn : Model -> Turn -> TurnView
@@ -118,11 +121,62 @@ buildTurn model { draws, plays, round } =
         }
 
 
+findCard : Cards -> CardId -> Card
+findCard cards id =
+    let
+        card =
+            cards
+                |> List.filter (\card -> card.id == id)
+                |> List.head
+    in
+        Maybe.withDefault invalidCard card
+
+
 findPieceCard : Model -> PieceId -> Card
 findPieceCard { cards, game } id =
     Dict.get id game.cards
         |> Maybe.map (findCard cards)
         |> Maybe.withDefault invalidCard
+
+
+getBoardLimit : List Coordinate -> (List Coordinate -> Maybe Coordinate) -> Int -> Coordinate
+getBoardLimit coordinates getLimit shift =
+    getLimit coordinates
+        |> Maybe.map ((+) shift)
+        |> Maybe.withDefault 0
+
+
+getBoardRange : List Position -> (Position -> Coordinate) -> List Coordinate
+getBoardRange positions accessor =
+    let
+        getLimit =
+            List.map accessor positions
+                |> getBoardLimit
+    in
+        List.range (getLimit List.minimum -1) (getLimit List.maximum 1)
+
+
+
+-- VIEW
+
+
+view : Model -> Html Msg
+view model =
+    let
+        gameModel =
+            buildGame model
+    in
+        div []
+            [ h1 [] [ text "Cottage" ]
+            , button [ onClick StartGame ] [ text "Start game" ]
+            , button [ onClick EndTurn ] [ text "End turn" ]
+            , div [ style mainStyle ]
+                [ gameView gameModel
+                , turnsView gameModel.turns
+                , messageView gameModel.messages
+                , cardsView model.cards
+                ]
+            ]
 
 
 turnsView : List TurnView -> Html Msg
@@ -140,10 +194,6 @@ turnsView turns =
 turnView : TurnView -> Html Msg
 turnView turn =
     let
-        cardText : CardView -> String
-        cardText { card, id } =
-            card.name ++ " #" ++ toString id
-
         draws =
             if turn.draws == [] then
                 "No cards"
@@ -151,10 +201,6 @@ turnView turn =
                 turn.draws
                     |> List.map cardText
                     |> String.join ", "
-
-        playText : PlayView -> String
-        playText { card, id, position } =
-            card.name ++ " #" ++ toString id ++ " " ++ showPosition position
 
         plays =
             if turn.plays == [] then
@@ -171,8 +217,18 @@ turnView turn =
             ]
 
 
-showPosition : Position -> String
-showPosition ( x, y ) =
+cardText : CardView -> String
+cardText { card, id } =
+    card.name ++ " #" ++ toString id
+
+
+playText : PlayView -> String
+playText { card, id, position } =
+    cardText { card = card, id = id } ++ " " ++ positionText position
+
+
+positionText : Position -> String
+positionText ( x, y ) =
     "(" ++ toString x ++ ", " ++ toString y ++ ")"
 
 
@@ -266,49 +322,6 @@ boardCell cell =
             [ content ]
 
 
-getBoard : Cards -> BoardCards -> Board
-getBoard allCards gameCards =
-    let
-        getRange =
-            gameCards
-                |> Dict.keys
-                |> getBoardRange
-
-        cards =
-            Dict.map (\_ -> buildCard allCards) gameCards
-
-        xRange =
-            getRange (\( x, _ ) -> x)
-
-        yRange =
-            getRange (\( _, y ) -> y)
-
-        getCell x y =
-            { position = ( x, y )
-            , card = Dict.get ( x, y ) cards
-            }
-    in
-        yRange
-            |> List.map (\y -> List.map (\x -> getCell x y) xRange)
-
-
-getBoardRange : List Position -> (Position -> Coordinate) -> List Coordinate
-getBoardRange positions accessor =
-    let
-        getLimit =
-            List.map accessor positions
-                |> getBoardLimit
-    in
-        List.range (getLimit List.minimum -1) (getLimit List.maximum 1)
-
-
-getBoardLimit : List Coordinate -> (List Coordinate -> Maybe Coordinate) -> Int -> Coordinate
-getBoardLimit coordinates getLimit shift =
-    getLimit coordinates
-        |> Maybe.map ((+) shift)
-        |> Maybe.withDefault 0
-
-
 deckView : List CardView -> Html Msg
 deckView deck =
     div [ style deckStyle ]
@@ -377,19 +390,6 @@ cardBar card =
         [ div [ style cardTitleStyle ] [ text card.name ]
         , div [ style cardCostStyle ] [ text <| toString card.cost ]
         ]
-
-
-findCard : Cards -> CardId -> Card
-findCard cards id =
-    let
-        card =
-            cards
-                |> List.filter (\card -> card.id == id)
-                |> List.head
-    in
-        Maybe.withDefault invalidCard card
-
-
 
 
 
