@@ -33,7 +33,20 @@ type alias GameView =
     , deck : List CardView
     , hand : List CardView
     , messages : Messages
-    , turns : Turns
+    , turns : List TurnView
+    }
+
+
+type alias PlayView =
+    { id : PieceId
+    , card : Card
+    , position : Position
+    }
+
+
+type alias TurnView =
+    { plays : List PlayView
+    , round : RoundNumber
     }
 
 
@@ -69,13 +82,16 @@ buildGameView model =
         buildCards : List GameCard -> List CardView
         buildCards =
             List.map (buildCard cards)
+
+        allTurns =
+            [ game.turns.current ] ++ List.reverse game.turns.history
     in
         { activeCard = game.activeCard
         , board = getBoard cards game.board
         , deck = buildCards game.deck
         , hand = buildCards game.hand
         , messages = game.messages
-        , turns = game.turns
+        , turns = List.map (buildTurn model) allTurns
         }
 
 
@@ -86,15 +102,32 @@ buildCard cards { id, card } =
     }
 
 
-turnsView : Turns -> Html Msg
+buildTurn : Model -> Turn -> TurnView
+buildTurn model { round, plays } =
+    let
+        buildPlay { card, position } =
+            { id = card
+            , card = findPieceCard model card
+            , position = position
+            }
+    in
+        { round = round
+        , plays = List.map buildPlay plays
+        }
+
+
+findPieceCard : Model -> PieceId -> Card
+findPieceCard { cards, game } id =
+    Dict.get id game.cards
+        |> Maybe.map (findCard cards)
+        |> Maybe.withDefault invalidCard
+
+
+turnsView : List TurnView -> Html Msg
 turnsView turns =
     let
-        allTurns =
-            [ turns.current ] ++ (List.reverse turns.history)
-
         rows =
-            allTurns
-                |> List.map turnView
+            List.map turnView turns
     in
         div [ style messagesStyle ]
             [ h2 [] [ text "Turns" ]
@@ -102,12 +135,12 @@ turnsView turns =
             ]
 
 
-turnView : Turn -> Html Msg
+turnView : TurnView -> Html Msg
 turnView turn =
     let
-        playText : Play -> String
-        playText { card, position } =
-            "#" ++ toString card ++ " " ++ showPosition position
+        playText : PlayView -> String
+        playText { id, position } =
+            "#" ++ toString id ++ " " ++ showPosition position
 
         plays =
             if turn.plays == [] then
