@@ -116,7 +116,7 @@ gameView { cards, game } =
         [ h2 [] [ text "Board" ]
         , boardView cards game.board
         , h2 [] [ text "Hand" ]
-        , handView game (findDeckCards cards game.hand)
+        , handView cards game
         , h2 [] [ text "Deck" ]
         , button [ onClick (Draw 1) ] [ text "Draw" ]
         , deckView game.deck
@@ -234,14 +234,19 @@ cardView card =
         ]
 
 
-handView : Game -> GameCards -> Html Msg
-handView game cards =
+handView : Cards -> Game -> Html Msg
+handView cards game =
     let
         singleView =
             gameCardView game
+
+        handCards =
+            game.hand
+                |> List.map (\card -> ( card.id, findCard cards card.card ))
+                |> List.map singleView
     in
         div [ style cardBoxStyle ]
-            (List.map singleView cards)
+            handCards
 
 
 gameCardView : Game -> ( PieceId, Card ) -> Html Msg
@@ -272,12 +277,6 @@ cardBar card =
         [ div [ style cardTitleStyle ] [ text card.name ]
         , div [ style cardCostStyle ] [ text <| toString card.cost ]
         ]
-
-
-findDeckCards : Cards -> Deck -> GameCards
-findDeckCards cards deck =
-    deck
-        |> List.map (\card -> ( card.id, findCard cards card.card ))
 
 
 findCard : Cards -> CardId -> Card

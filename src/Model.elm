@@ -39,10 +39,6 @@ type alias GameCard =
     }
 
 
-type alias GameCards =
-    List ( PieceId, Card )
-
-
 type alias Deck =
     List GameCard
 
