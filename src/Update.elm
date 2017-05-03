@@ -93,10 +93,21 @@ playGame model msg =
 initializeGame : Model -> Deck -> Game
 initializeGame { game, rules } deck =
     let
+        getCardPair { id, card } =
+            ( id, card )
+
+        cards =
+            deck
+                |> List.map getCardPair
+                |> Dict.fromList
+
         initialDraw =
             draw rules.initialDraw
     in
-        { game | deck = deck }
+        { game
+            | cards = cards
+            , deck = deck
+        }
             |> initialDraw
 
 

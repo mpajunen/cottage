@@ -39,6 +39,10 @@ type alias GameCard =
     }
 
 
+type alias GameCards =
+    Dict.Dict PieceId CardId
+
+
 type alias Deck =
     List GameCard
 
@@ -91,6 +95,7 @@ type alias Messages =
 
 type alias Game =
     { activeCard : Maybe PieceId
+    , cards : GameCards
     , board : BoardCards
     , deck : Deck
     , hand : Hand
@@ -191,6 +196,7 @@ emptyGame : Game
 emptyGame =
     { activeCard = Nothing
     , board = emptyBoard
+    , cards = Dict.empty
     , deck = []
     , hand = []
     , messages = []
