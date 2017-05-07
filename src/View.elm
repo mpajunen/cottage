@@ -32,6 +32,7 @@ type alias GameView =
     , board : Board
     , deck : List CardView
     , hand : List CardView
+    , resources : List ResourceInfo
     , turns : List TurnView
     }
 
@@ -98,8 +99,18 @@ buildGame model =
         , board = buildBoard model
         , deck = List.map buildCard game.deck
         , hand = List.map buildCard game.hand
+        , resources = buildResources model
         , turns = List.map (buildTurn model) allTurns
         }
+
+
+buildResources : Model -> List ResourceInfo
+buildResources { game, rules } =
+    let
+        createInfo ( resource, value ) =
+            ResourceInfo resource value <| getResourceGain rules resource
+    in
+        List.map createInfo game.resources
 
 
 buildTurn : Model -> Turn -> TurnView
@@ -214,6 +225,8 @@ gameView model =
     div [ style gameStyle ]
         [ h2 [] [ text "Board" ]
         , boardView model.board
+        , h2 [] [ text "Resources" ]
+        , resourcesView model.resources
         , h2 [] [ text "Hand" ]
         , handView model
         , h2 [] [ text "Deck" ]
@@ -266,6 +279,19 @@ boardCell cell =
             , onClick playCard
             ]
             [ content ]
+
+
+resourcesView : List ResourceInfo -> Html Msg
+resourcesView resources =
+    let
+        single { resource, value, roundGain } =
+            let
+                content =
+                    toString resource ++ ": " ++ toString value ++ " (" ++ toString roundGain ++ ")"
+            in
+                div [] [ text content ]
+    in
+        div [] <| List.map single resources
 
 
 deckView : List CardView -> Html Msg
