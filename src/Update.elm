@@ -177,7 +177,8 @@ playCard game id position =
             { turns | current = { current | plays = plays } }
     in
         { game
-            | board = board ++ [ newPlay ]
+            | activeCard = Nothing
+            , board = board ++ [ newPlay ]
             , hand = newHand
             , turns = newTurns
         }
