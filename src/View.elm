@@ -117,24 +117,6 @@ buildTurn model { draws, plays, round } =
         }
 
 
-findCard : Cards -> CardId -> Card
-findCard cards id =
-    let
-        card =
-            cards
-                |> List.filter (\card -> card.id == id)
-                |> List.head
-    in
-        Maybe.withDefault invalidCard card
-
-
-findPieceCard : Model -> PieceId -> Card
-findPieceCard { cards, game } id =
-    Dict.get id game.cards
-        |> Maybe.map (findCard cards)
-        |> Maybe.withDefault invalidCard
-
-
 getBoardLimit : List Coordinate -> (List Coordinate -> Maybe Coordinate) -> Int -> Coordinate
 getBoardLimit coordinates getLimit shift =
     getLimit coordinates
