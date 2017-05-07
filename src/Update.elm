@@ -185,8 +185,11 @@ tryPlayCard model position =
 
 
 playCard : Model -> Play -> Game
-playCard { game } newPlay =
+playCard model newPlay =
     let
+        { game } =
+            model
+
         { board, hand, turns } =
             game
 
@@ -206,8 +209,30 @@ playCard { game } newPlay =
             | activeCard = Nothing
             , board = board ++ [ newPlay ]
             , hand = newHand
+            , resources = payCard model newPlay
             , turns = newTurns
         }
+
+
+payCard : Model -> Play -> Resources
+payCard model play =
+    let
+        card =
+            findPieceCard model play.card
+    in
+        List.foldl payCost model.game.resources card.cost
+
+
+payCost : ResourceAmount -> Resources -> Resources
+payCost ( costResource, costCount ) resources =
+    let
+        paySingle ( resource, count ) =
+            if resource == costResource then
+                ( resource, count - costCount )
+            else
+                ( resource, count )
+    in
+        List.map paySingle resources
 
 
 findCard : Cards -> CardId -> Card
