@@ -185,6 +185,20 @@ someCards =
             [ (Gain ( Command, 2 ))
             ]
       }
+    , { id = 4
+      , name = "Quarry"
+      , cost = [ ( Build, 1 ) ]
+      , effects =
+            [ (Gain ( Build, 1 ))
+            ]
+      }
+    , { id = 5
+      , name = "Mine"
+      , cost = [ ( Build, 3 ) ]
+      , effects =
+            [ (Gain ( Build, 2 ))
+            ]
+      }
     ]
 
 
