@@ -253,6 +253,16 @@ findPieceCard { cards, game } id =
         |> Maybe.withDefault invalidCard
 
 
+isCardPlayable : Model -> Card -> Bool
+isCardPlayable { game } card =
+    let
+        resourceValid ( _, count ) =
+            count >= 0
+    in
+        List.foldl payCost game.resources card.cost
+            |> List.all resourceValid
+
+
 pickRandomCard : Cards -> Random.Generator Card
 pickRandomCard cards =
     cards

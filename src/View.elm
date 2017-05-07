@@ -21,9 +21,16 @@ type alias BoardCell =
     }
 
 
+type CardStatus
+    = Normal
+    | Active
+    | Unavailable
+
+
 type alias CardView =
     { id : PieceId
     , card : Card
+    , status : CardStatus
     }
 
 
@@ -82,7 +89,22 @@ buildBoard model =
 
 buildCard : Model -> PieceId -> CardView
 buildCard model id =
-    CardView id (findPieceCard model id)
+    let
+        activeId =
+            Maybe.withDefault invalidId model.game.activeCard
+
+        card =
+            findPieceCard model id
+
+        status =
+            if id == activeId then
+                Active
+            else if isCardPlayable model card then
+                Normal
+            else
+                Unavailable
+    in
+        CardView id card status
 
 
 buildGame : Model -> GameView
@@ -116,7 +138,7 @@ buildTurn : Model -> Turn -> TurnView
 buildTurn model { draws, plays, round } =
     let
         buildDraw card =
-            CardView card (findPieceCard model card)
+            CardView card (findPieceCard model card) Normal
 
         buildPlay { card, position } =
             PlayView card (findPieceCard model card) position
@@ -211,7 +233,7 @@ cardText { card, id } =
 
 playText : PlayView -> String
 playText { card, id, position } =
-    cardText { card = card, id = id } ++ " " ++ positionText position
+    cardText { card = card, id = id, status = Normal } ++ " " ++ positionText position
 
 
 positionText : Position -> String
@@ -334,22 +356,22 @@ handView model =
 
 
 gameCardView : GameView -> CardView -> Html Msg
-gameCardView { activeCard } { id, card } =
+gameCardView { activeCard } { id, card, status } =
     let
-        extraStyle =
-            case activeCard of
-                Just activeId ->
-                    if activeId == id then
-                        selectedStyle
-                    else
-                        []
+        ( extraStyle, clickAction ) =
+            case status of
+                Active ->
+                    ( selectedStyle, NoOp )
 
-                Nothing ->
-                    []
+                Normal ->
+                    ( [], SelectCard id )
+
+                Unavailable ->
+                    ( unavailableStyle, NoOp )
     in
         div
             [ style (cardStyle ++ extraStyle)
-            , onClick (SelectCard id)
+            , onClick clickAction
             ]
             [ cardBar card
             ]
@@ -479,4 +501,11 @@ slotStyle =
 undergroundStyle : Style
 undergroundStyle =
     [ ( "background-color", "#888888" )
+    ]
+
+
+unavailableStyle : Style
+unavailableStyle =
+    [ ( "border-color", "#aaaaaa" )
+    , ( "color", "#aaaaaa" )
     ]

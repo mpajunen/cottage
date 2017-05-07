@@ -170,9 +170,14 @@ someCards =
     ]
 
 
+invalidId : CardId
+invalidId =
+    -1
+
+
 invalidCard : Card
 invalidCard =
-    { id = -1
+    { id = invalidId
     , name = "Invalid card"
     , cost = []
     }
