@@ -62,12 +62,7 @@ playGame model msg =
                     |> draw rules.roundDraw
 
             PlayCard position ->
-                case game.activeCard of
-                    Just id ->
-                        playCard game id position
-
-                    Nothing ->
-                        game
+                tryPlayCard model position
 
             SelectCard id ->
                 { game | activeCard = Just id }
@@ -144,19 +139,25 @@ endTurn game =
 
         newTurns =
             { turns
-                | current =
-                    { draws = []
-                    , plays = []
-                    , round = turn.round + 1
-                    }
+                | current = Turn [] [] (turn.round + 1)
                 , history = turns.history ++ [ turn ]
             }
     in
         { game | turns = newTurns }
 
 
-playCard : Game -> PieceId -> Position -> Game
-playCard game id position =
+tryPlayCard : Model -> Position -> Game
+tryPlayCard model position =
+    case model.game.activeCard of
+        Just card ->
+            playCard model (Play card position)
+
+        Nothing ->
+            model.game
+
+
+playCard : Model -> Play -> Game
+playCard { game } newPlay =
     let
         { board, hand, turns } =
             game
@@ -164,11 +165,8 @@ playCard game id position =
         { current } =
             turns
 
-        ( cards, newHand ) =
-            List.partition (\card -> card == id) hand
-
-        newPlay =
-            { card = id, position = position }
+        newHand =
+            List.filter (\card -> card /= newPlay.card) hand
 
         plays =
             current.plays ++ [ newPlay ]

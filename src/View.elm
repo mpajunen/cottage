@@ -105,8 +105,8 @@ buildGame model =
 buildTurn : Model -> Turn -> TurnView
 buildTurn model { draws, plays, round } =
     let
-        buildDraw id =
-            CardView id (findPieceCard model id)
+        buildDraw card =
+            CardView card (findPieceCard model card)
 
         buildPlay { card, position } =
             PlayView card (findPieceCard model card) position
