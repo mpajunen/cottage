@@ -30,7 +30,7 @@ type alias CardView =
 type alias GameView =
     { activeCard : Maybe PieceId
     , board : Board
-    , deck : List CardView
+    , deck : CardCount
     , hand : List CardView
     , resources : List ResourceInfo
     , turns : List TurnView
@@ -65,12 +65,9 @@ buildBoard model =
         buildPosition { x, y } =
             ( x, y )
 
-        buildCard id =
-            CardView id (findPieceCard model id)
-
         cards =
             game.board
-                |> List.map (\p -> ( buildPosition p.position, buildCard p.card ))
+                |> List.map (\p -> ( buildPosition p.position, buildCard model p.card ))
                 |> Dict.fromList
 
         getCell y x =
@@ -83,22 +80,24 @@ buildBoard model =
             |> List.map (\y -> List.map (getCell y) (getRange .x))
 
 
+buildCard : Model -> PieceId -> CardView
+buildCard model id =
+    CardView id (findPieceCard model id)
+
+
 buildGame : Model -> GameView
 buildGame model =
     let
         { cards, game } =
             model
 
-        buildCard id =
-            CardView id (findPieceCard model id)
-
         allTurns =
             [ game.turns.current ] ++ List.reverse game.turns.history
     in
         { activeCard = game.activeCard
         , board = buildBoard model
-        , deck = List.map buildCard game.deck
-        , hand = List.map buildCard game.hand
+        , deck = List.length game.deck
+        , hand = List.map (buildCard model) game.hand
         , resources = buildResources model
         , turns = List.map (buildTurn model) allTurns
         }
@@ -294,10 +293,10 @@ resourcesView resources =
         div [] <| List.map single resources
 
 
-deckView : List CardView -> Html Msg
-deckView deck =
+deckView : CardCount -> Html Msg
+deckView count =
     div [ style deckStyle ]
-        [ text ("(" ++ (toString <| List.length deck) ++ ")") ]
+        [ text ("(" ++ (toString count) ++ ")") ]
 
 
 cardsView : Cards -> Html Msg
