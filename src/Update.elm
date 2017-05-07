@@ -60,6 +60,7 @@ playGame model msg =
             EndTurn ->
                 endTurn game
                     |> draw rules.roundDraw
+                    |> gainResources rules
 
             PlayCard position ->
                 tryPlayCard model position
@@ -93,6 +94,33 @@ initializeGame { game, rules } cards =
             , deck = List.map .id cards
         }
             |> initialDraw
+            |> initResources rules
+
+
+initResources : Rules -> Game -> Game
+initResources rules game =
+    let
+        getAmount { resource, value } =
+            ( resource, value )
+    in
+        { game | resources = List.map getAmount rules.resources }
+
+
+gainResources : Rules -> Game -> Game
+gainResources rules game =
+    let
+        getAmount ( resource, value ) =
+            ( resource, value + getResourceGain rules resource )
+    in
+        { game | resources = List.map getAmount game.resources }
+
+
+getResourceGain : Rules -> Resource -> ResourceCount
+getResourceGain rules resource =
+    List.filter (\r -> r.resource == resource) rules.resources
+        |> List.map .roundGain
+        |> List.head
+        |> Maybe.withDefault 0
 
 
 createDeck : DeckRules -> Cards -> Random.Generator (List GameCard)

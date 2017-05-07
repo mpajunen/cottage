@@ -108,7 +108,15 @@ type alias Game =
     , board : List Play
     , deck : Deck
     , hand : Hand
+    , resources : Resources
     , turns : Turns
+    }
+
+
+type alias ResourceInfo =
+    { resource : Resource
+    , value : Int
+    , roundGain : Int
     }
 
 
@@ -119,6 +127,7 @@ type alias DeckRules =
 
 type alias Rules =
     { deck : DeckRules
+    , resources : List ResourceInfo
     , initialDraw : CardCount
     , roundDraw : CardCount
     }
@@ -174,6 +183,11 @@ rules =
     { deck =
         { cardCount = 30
         }
+    , resources =
+        [ { resource = Build, value = 3, roundGain = 1 }
+        , { resource = Command, value = 3, roundGain = 0 }
+        , { resource = Magic, value = 3, roundGain = 0 }
+        ]
     , initialDraw = 5
     , roundDraw = 3
     }
@@ -201,6 +215,7 @@ emptyGame =
     , cards = Dict.empty
     , deck = []
     , hand = []
+    , resources = []
     , turns = initialTurns
     }
 
