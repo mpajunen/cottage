@@ -60,7 +60,7 @@ playGame model msg =
             EndTurn ->
                 endTurn game
                     |> draw rules.roundDraw
-                    |> gainResources rules
+                    |> gainResources model
 
             PlayCard position ->
                 tryPlayCard model position
@@ -106,17 +106,44 @@ initResources rules game =
         { game | resources = List.map getAmount rules.resources }
 
 
-gainResources : Rules -> Game -> Game
-gainResources rules game =
+gainResources : Model -> Game -> Game
+gainResources model game =
     let
         getAmount ( resource, value ) =
-            ( resource, value + getResourceGain rules resource )
+            ( resource, value + getResourceGain model resource )
     in
-        { game | resources = List.map getAmount game.resources }
+        { game | resources = List.map getAmount model.game.resources }
 
 
-getResourceGain : Rules -> Resource -> ResourceCount
-getResourceGain rules resource =
+getResourceGain : Model -> Resource -> ResourceCount
+getResourceGain model resource =
+    getInitialGain model.rules resource + getEffectGain model resource
+
+
+getEffectGain : Model -> Resource -> ResourceCount
+getEffectGain model resource =
+    let
+        getCardEffects =
+            .card >> findPieceCard model >> .effects
+
+        effects =
+            List.map getCardEffects model.game.board
+                |> List.concat
+
+        getGain effect =
+            case effect of
+                Gain ( effectResource, count ) ->
+                    if effectResource == resource then
+                        count
+                    else
+                        0
+    in
+        List.map getGain effects
+            |> List.sum
+
+
+getInitialGain : Rules -> Resource -> ResourceCount
+getInitialGain rules resource =
     List.filter (\r -> r.resource == resource) rules.resources
         |> List.map .roundGain
         |> List.head

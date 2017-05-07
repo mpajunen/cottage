@@ -126,12 +126,12 @@ buildGame model =
 
 
 buildResources : Model -> List ResourceInfo
-buildResources { game, rules } =
+buildResources model =
     let
         createInfo ( resource, value ) =
-            ResourceInfo resource value <| getResourceGain rules resource
+            ResourceInfo resource value <| getResourceGain model resource
     in
-        List.map createInfo game.resources
+        List.map createInfo model.game.resources
 
 
 buildTurn : Model -> Turn -> TurnView
