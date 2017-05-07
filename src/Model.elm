@@ -24,6 +24,14 @@ type alias Resources =
     List ResourceAmount
 
 
+type Effect
+    = Gain ResourceAmount
+
+
+type alias Effects =
+    List Effect
+
+
 type alias CardId =
     Int
 
@@ -36,6 +44,7 @@ type alias Card =
     { id : CardId
     , name : String
     , cost : Resources
+    , effects : Effects
     }
 
 
@@ -158,14 +167,23 @@ someCards =
     [ { id = 1
       , name = "Barracks"
       , cost = [ ( Build, 2 ) ]
+      , effects =
+            [ (Gain ( Command, 1 ))
+            ]
       }
     , { id = 2
       , name = "Laboratory"
       , cost = [ ( Build, 3 ) ]
+      , effects =
+            [ (Gain ( Magic, 1 ))
+            ]
       }
     , { id = 3
       , name = "Cavern"
       , cost = [ ( Build, 2 ) ]
+      , effects =
+            [ (Gain ( Command, 2 ))
+            ]
       }
     ]
 
@@ -180,6 +198,7 @@ invalidCard =
     { id = invalidId
     , name = "Invalid card"
     , cost = []
+    , effects = []
     }
 
 

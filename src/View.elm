@@ -339,6 +339,7 @@ cardView : Card -> Html Msg
 cardView card =
     div [ style cardStyle ]
         [ cardBar card
+        , div [] (List.map effectView card.effects)
         ]
 
 
@@ -374,6 +375,7 @@ gameCardView { activeCard } { id, card, status } =
             , onClick clickAction
             ]
             [ cardBar card
+            , div [] (List.map effectView card.effects)
             ]
 
 
@@ -385,15 +387,27 @@ cardBar card =
         ]
 
 
+effectView : Effect -> Html Msg
+effectView effect =
+    let
+        content =
+            case effect of
+                Gain amount ->
+                    "Gain " ++ resourceText amount
+    in
+        div [ style effectStyle ] [ text content ]
+
+
 costView : Resources -> Html Msg
 costView cost =
-    let
-        single ( resource, count ) =
-            toString count ++ resourceSymbol resource
-    in
-        List.map single cost
-            |> String.concat
-            |> text
+    List.map resourceText cost
+        |> String.concat
+        |> text
+
+
+resourceText : ResourceAmount -> String
+resourceText ( resource, count ) =
+    toString count ++ resourceSymbol resource
 
 
 resourceSymbol : Resource -> String
@@ -486,6 +500,12 @@ cardTitleStyle : Style
 cardTitleStyle =
     [ ( "flex", "3 auto" )
     , ( "padding", "5px" )
+    ]
+
+
+effectStyle : Style
+effectStyle =
+    [ ( "padding", "5px" )
     ]
 
 
