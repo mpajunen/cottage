@@ -6,11 +6,25 @@ import Dict
 -- MODEL STRUCTURE
 
 
-type alias CardId =
+type Resource
+    = Build
+    | Command
+    | Magic
+
+
+type alias ResourceCount =
     Int
 
 
-type alias Cost =
+type alias ResourceAmount =
+    ( Resource, ResourceCount )
+
+
+type alias Resources =
+    List ResourceAmount
+
+
+type alias CardId =
     Int
 
 
@@ -21,7 +35,7 @@ type alias PieceId =
 type alias Card =
     { id : CardId
     , name : String
-    , cost : Cost
+    , cost : Resources
     }
 
 
@@ -134,15 +148,15 @@ someCards : Cards
 someCards =
     [ { id = 1
       , name = "Barracks"
-      , cost = 2
+      , cost = [ ( Build, 2 ) ]
       }
     , { id = 2
       , name = "Laboratory"
-      , cost = 3
+      , cost = [ ( Build, 3 ) ]
       }
     , { id = 3
       , name = "Cavern"
-      , cost = 2
+      , cost = [ ( Build, 2 ) ]
       }
     ]
 
@@ -151,7 +165,7 @@ invalidCard : Card
 invalidCard =
     { id = -1
     , name = "Invalid card"
-    , cost = 0
+    , cost = []
     }
 
 

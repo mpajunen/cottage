@@ -334,8 +334,32 @@ cardBar : Card -> Html Msg
 cardBar card =
     div [ style cardBarStyle ]
         [ div [ style cardTitleStyle ] [ text card.name ]
-        , div [ style cardCostStyle ] [ text <| toString card.cost ]
+        , div [ style cardCostStyle ] [ costView card.cost ]
         ]
+
+
+costView : Resources -> Html Msg
+costView cost =
+    let
+        single ( resource, count ) =
+            toString count ++ resourceSymbol resource
+    in
+        List.map single cost
+            |> String.concat
+            |> text
+
+
+resourceSymbol : Resource -> String
+resourceSymbol resource =
+    case resource of
+        Build ->
+            "B"
+
+        Command ->
+            "C"
+
+        Magic ->
+            "M"
 
 
 
