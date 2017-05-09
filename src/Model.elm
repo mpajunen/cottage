@@ -24,8 +24,20 @@ type alias Resources =
     List ResourceAmount
 
 
+type alias Life =
+    Int
+
+
+type alias Creature =
+    { attack : Life
+    , defense : Life
+    , life : Life
+    }
+
+
 type Effect
     = Gain ResourceAmount
+    | Summon Creature
 
 
 type alias Effects =

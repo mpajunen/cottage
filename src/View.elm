@@ -396,6 +396,9 @@ effectView effect =
                         "Gain " ++ resourceText ( resource, count )
                     else
                         "Upkeep " ++ resourceText ( resource, -count )
+
+                Summon creature ->
+                    "Summon " ++ creatureText creature
     in
         div [ style effectStyle ] [ text content ]
 
@@ -405,6 +408,11 @@ costView cost =
     List.map resourceText cost
         |> String.concat
         |> text
+
+
+creatureText : Creature -> String
+creatureText { attack, defense, life } =
+    toString attack ++ " / " ++ toString defense ++ ", " ++ toString life ++ " HP"
 
 
 resourceText : ResourceAmount -> String

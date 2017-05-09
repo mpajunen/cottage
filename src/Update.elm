@@ -137,6 +137,9 @@ getEffectGain model resource =
                         count
                     else
                         0
+
+                Summon _ ->
+                    0
     in
         List.map getGain effects
             |> List.sum
