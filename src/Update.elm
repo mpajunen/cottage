@@ -1,7 +1,7 @@
 module Update exposing (..)
 
+import AllDict
 import Array
-import Dict
 import Random
 import Random.Array
 import Model exposing (..)
@@ -84,7 +84,7 @@ initializeGame { game, rules } cards =
         cardMap =
             cards
                 |> List.map getCardPair
-                |> Dict.fromList
+                |> AllDict.fromList ordPiece
 
         initialDraw =
             draw rules.initialDraw
@@ -156,9 +156,12 @@ createDeck { cardCount } cards =
         pick =
             pickRandomCard cards
                 |> Random.map .id
+
+        create id =
+            GameCard (PieceId id)
     in
         Random.list cardCount pick
-            |> Random.map (List.indexedMap GameCard)
+            |> Random.map (List.indexedMap create)
 
 
 draw : Int -> Game -> Game
@@ -275,7 +278,7 @@ findCard cards id =
 
 findPieceCard : Model -> PieceId -> Card
 findPieceCard { cards, game } id =
-    Dict.get id game.cards
+    AllDict.get id game.cards
         |> Maybe.map (findCard cards)
         |> Maybe.withDefault invalidCard
 

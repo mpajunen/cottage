@@ -90,7 +90,7 @@ buildCard : Model -> PieceId -> CardView
 buildCard model id =
     let
         activeId =
-            Maybe.withDefault invalidId model.game.activeCard
+            Maybe.withDefault invalidPieceId model.game.activeCard
 
         card =
             findPieceCard model id
@@ -226,7 +226,11 @@ turnView turn =
 
 cardText : CardView -> String
 cardText { card, id } =
-    card.name ++ " #" ++ toString id
+    let
+        (PieceId pieceId) =
+            id
+    in
+        card.name ++ " #" ++ toString pieceId
 
 
 playText : PlayView -> String

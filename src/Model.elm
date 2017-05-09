@@ -1,6 +1,6 @@
 module Model exposing (..)
 
-import Dict
+import AllDict
 
 
 -- MODEL STRUCTURE
@@ -32,12 +32,12 @@ type alias Effects =
     List Effect
 
 
-type alias CardId =
-    Int
+type CardId
+    = CardId Int
 
 
-type alias PieceId =
-    Int
+type PieceId
+    = PieceId Int
 
 
 type alias Card =
@@ -63,7 +63,7 @@ type alias GameCard =
 
 
 type alias GameCards =
-    Dict.Dict PieceId CardId
+    AllDict.AllDict PieceId CardId Int
 
 
 type alias Deck =
@@ -162,37 +162,42 @@ type alias Model =
 -- INITIAL MODEL
 
 
+ordPiece : PieceId -> Int
+ordPiece (PieceId id) =
+    id
+
+
 someCards : Cards
 someCards =
-    [ { id = 1
+    [ { id = CardId 1
       , name = "Barracks"
       , cost = [ ( Build, 2 ) ]
       , effects =
             [ (Gain ( Command, 1 ))
             ]
       }
-    , { id = 2
+    , { id = CardId 2
       , name = "Laboratory"
       , cost = [ ( Build, 3 ) ]
       , effects =
             [ (Gain ( Magic, 1 ))
             ]
       }
-    , { id = 3
+    , { id = CardId 3
       , name = "Cavern"
       , cost = [ ( Build, 2 ) ]
       , effects =
             [ (Gain ( Command, 2 ))
             ]
       }
-    , { id = 4
+    , { id = CardId 4
       , name = "Quarry"
       , cost = [ ( Build, 1 ) ]
       , effects =
             [ (Gain ( Build, 1 ))
             ]
       }
-    , { id = 5
+    , { id = CardId 5
       , name = "Mine"
       , cost = [ ( Build, 3 ) ]
       , effects =
@@ -202,14 +207,14 @@ someCards =
     ]
 
 
-invalidId : CardId
-invalidId =
-    -1
+invalidCardId : CardId
+invalidCardId =
+    CardId -1
 
 
 invalidCard : Card
 invalidCard =
-    { id = invalidId
+    { id = invalidCardId
     , name = "Invalid card"
     , cost = []
     , effects = []
@@ -250,7 +255,7 @@ emptyGame : Game
 emptyGame =
     { activeCard = Nothing
     , board = []
-    , cards = Dict.empty
+    , cards = AllDict.empty ordPiece
     , deck = []
     , hand = []
     , resources = []
@@ -264,3 +269,8 @@ initialModel =
     , game = emptyGame
     , rules = rules
     }
+
+
+invalidPieceId : PieceId
+invalidPieceId =
+    PieceId -1
