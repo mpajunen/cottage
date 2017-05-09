@@ -391,8 +391,11 @@ effectView effect =
     let
         content =
             case effect of
-                Gain amount ->
-                    "Gain " ++ resourceText amount
+                Gain ( resource, count ) ->
+                    if count > 0 then
+                        "Gain " ++ resourceText ( resource, count )
+                    else
+                        "Upkeep " ++ resourceText ( resource, -count )
     in
         div [ style effectStyle ] [ text content ]
 

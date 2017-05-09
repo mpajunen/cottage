@@ -204,6 +204,14 @@ someCards =
             [ (Gain ( Build, 2 ))
             ]
       }
+    , { id = CardId 6
+      , name = "Experimental laboratory"
+      , cost = [ ( Build, 5 ) ]
+      , effects =
+            [ (Gain ( Magic, 3 ))
+            , (Gain ( Command, -1 ))
+            ]
+      }
     ]
 
 
