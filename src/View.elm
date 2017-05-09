@@ -35,8 +35,7 @@ type alias CardView =
 
 
 type alias GameView =
-    { activeCard : Maybe PieceId
-    , board : Board
+    { board : Board
     , deck : CardCount
     , hand : List CardView
     , resources : List ResourceInfo
@@ -116,8 +115,7 @@ buildGame model =
         allTurns =
             [ game.turns.current ] ++ List.reverse game.turns.history
     in
-        { activeCard = game.activeCard
-        , board = buildBoard model
+        { board = buildBoard model
         , deck = List.length game.deck
         , hand = List.map (buildCard model) game.hand
         , resources = buildResources model
@@ -249,7 +247,7 @@ gameView model =
         , h2 [] [ text "Resources" ]
         , resourcesView model.resources
         , h2 [] [ text "Hand" ]
-        , handView model
+        , handView model.hand
         , h2 [] [ text "Deck" ]
         , deckView model.deck
         ]
@@ -343,21 +341,18 @@ cardView card =
         ]
 
 
-handView : GameView -> Html Msg
-handView model =
+handView : List CardView -> Html Msg
+handView hand =
     let
-        singleView =
-            gameCardView model
-
         handCards =
-            List.map singleView model.hand
+            List.map gameCardView hand
     in
         div [ style cardBoxStyle ]
             handCards
 
 
-gameCardView : GameView -> CardView -> Html Msg
-gameCardView { activeCard } { id, card, status } =
+gameCardView : CardView -> Html Msg
+gameCardView { id, card, status } =
     let
         ( extraStyle, clickAction ) =
             case status of
