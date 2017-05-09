@@ -224,6 +224,29 @@ someCards =
             , (Gain ( Command, -1 ))
             ]
       }
+    , { id = CardId 7
+      , name = "Footman"
+      , cost = [ ( Command, 1 ) ]
+      , effects =
+            [ (Summon (Creature 3 1 3))
+            ]
+      }
+    , { id = CardId 8
+      , name = "Knight"
+      , cost = [ ( Command, 3 ) ]
+      , effects =
+            [ (Summon (Creature 6 2 8))
+            , (Gain ( Command, -1 ))
+            ]
+      }
+    , { id = CardId 9
+      , name = "Golem"
+      , cost = [ ( Build, 1 ), ( Command, 1 ), ( Magic, 2 ) ]
+      , effects =
+            [ (Summon (Creature 5 3 12))
+            , (Gain ( Magic, -1 ))
+            ]
+      }
     ]
 
 
