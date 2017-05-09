@@ -3,6 +3,7 @@ module Model exposing (emptyGame, initialModel, invalidCard, invalidPieceId, ord
 import AllDict
 import Data.Cards exposing (allCards)
 import Data.Common exposing (..)
+import Data.Enemies exposing (enemyWaves)
 
 
 -- INITIAL MODEL
@@ -72,6 +73,7 @@ emptyGame =
 initialModel : Model
 initialModel =
     { cards = allCards
+    , enemies = enemyWaves
     , game = emptyGame
     , rules = rules
     }

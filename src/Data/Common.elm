@@ -1,6 +1,7 @@
 module Data.Common exposing (..)
 
 import AllDict
+import Dict
 
 
 type Resource
@@ -132,6 +133,10 @@ type alias Game =
     }
 
 
+type alias Enemies =
+    Dict.Dict RoundNumber (List Creature)
+
+
 type alias ResourceInfo =
     { resource : Resource
     , value : Int
@@ -154,6 +159,7 @@ type alias Rules =
 
 type alias Model =
     { cards : Cards
+    , enemies : Enemies
     , game : Game
     , rules : Rules
     }
