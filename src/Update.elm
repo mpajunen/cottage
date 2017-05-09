@@ -4,6 +4,7 @@ import AllDict
 import Array
 import Random
 import Random.Array
+import Data.Common exposing (..)
 import Model exposing (..)
 
 

@@ -1,156 +1,17 @@
 module Model exposing (..)
 
 import AllDict
+import Data.Cards exposing (allCards)
+import Data.Common exposing (..)
 
 
 -- MODEL STRUCTURE
 
 
-type Resource
-    = Build
-    | Command
-    | Magic
-
-
-type alias ResourceCount =
-    Int
-
-
-type alias ResourceAmount =
-    ( Resource, ResourceCount )
-
-
-type alias Resources =
-    List ResourceAmount
-
-
-type alias Life =
-    Int
-
-
-type alias Creature =
-    { attack : Life
-    , defense : Life
-    , life : Life
-    }
-
-
-type Effect
-    = Gain ResourceAmount
-    | Summon Creature
-
-
-type alias Effects =
-    List Effect
-
-
-type CardId
-    = CardId Int
-
-
-type PieceId
-    = PieceId Int
-
-
-type alias Card =
-    { id : CardId
-    , name : String
-    , cost : Resources
-    , effects : Effects
-    }
-
-
-type alias Cards =
-    List Card
-
-
-type alias CardCount =
-    Int
-
-
-type alias GameCard =
-    { id : PieceId
-    , card : CardId
-    }
-
-
-type alias GameCards =
-    AllDict.AllDict PieceId CardId Int
-
-
-type alias Deck =
-    List PieceId
-
-
-type alias Hand =
-    List PieceId
-
-
-type alias Coordinate =
-    Int
-
-
-type alias Position =
-    { x : Coordinate
-    , y : Coordinate
-    }
-
-
-type alias Play =
-    { card : PieceId
-    , position : Position
-    }
-
-
-type alias RoundNumber =
-    Int
-
-
-type alias Turn =
-    { draws : List PieceId
-    , plays : List Play
-    , round : RoundNumber
-    }
-
-
-type alias TurnHistory =
-    List Turn
-
-
-type alias Turns =
-    { current : Turn
-    , history : TurnHistory
-    }
-
-
-type alias Game =
-    { activeCard : Maybe PieceId
-    , cards : GameCards
-    , board : List Play
-    , deck : Deck
-    , hand : Hand
-    , resources : Resources
-    , turns : Turns
-    }
-
-
-type alias ResourceInfo =
-    { resource : Resource
-    , value : Int
-    , roundGain : Int
-    }
-
-
-type alias DeckRules =
-    { cardCount : CardCount
-    }
-
-
-type alias Rules =
-    { deck : DeckRules
-    , resources : List ResourceInfo
-    , initialDraw : CardCount
-    , roundDraw : CardCount
+type alias Model =
+    { cards : Cards
+    , game : Game
+    , rules : Rules
     }
 
 
@@ -163,13 +24,6 @@ type Msg
     | InitGame (List GameCard)
 
 
-type alias Model =
-    { cards : Cards
-    , game : Game
-    , rules : Rules
-    }
-
-
 
 -- INITIAL MODEL
 
@@ -177,77 +31,6 @@ type alias Model =
 ordPiece : PieceId -> Int
 ordPiece (PieceId id) =
     id
-
-
-someCards : Cards
-someCards =
-    [ { id = CardId 1
-      , name = "Barracks"
-      , cost = [ ( Build, 2 ) ]
-      , effects =
-            [ (Gain ( Command, 1 ))
-            ]
-      }
-    , { id = CardId 2
-      , name = "Laboratory"
-      , cost = [ ( Build, 3 ) ]
-      , effects =
-            [ (Gain ( Magic, 1 ))
-            ]
-      }
-    , { id = CardId 3
-      , name = "Cavern"
-      , cost = [ ( Build, 2 ) ]
-      , effects =
-            [ (Gain ( Command, 2 ))
-            ]
-      }
-    , { id = CardId 4
-      , name = "Quarry"
-      , cost = [ ( Build, 1 ) ]
-      , effects =
-            [ (Gain ( Build, 1 ))
-            ]
-      }
-    , { id = CardId 5
-      , name = "Mine"
-      , cost = [ ( Build, 3 ) ]
-      , effects =
-            [ (Gain ( Build, 2 ))
-            ]
-      }
-    , { id = CardId 6
-      , name = "Experimental laboratory"
-      , cost = [ ( Build, 5 ) ]
-      , effects =
-            [ (Gain ( Magic, 3 ))
-            , (Gain ( Command, -1 ))
-            ]
-      }
-    , { id = CardId 7
-      , name = "Footman"
-      , cost = [ ( Command, 1 ) ]
-      , effects =
-            [ (Summon (Creature 3 1 3))
-            ]
-      }
-    , { id = CardId 8
-      , name = "Knight"
-      , cost = [ ( Command, 3 ) ]
-      , effects =
-            [ (Summon (Creature 6 2 8))
-            , (Gain ( Command, -1 ))
-            ]
-      }
-    , { id = CardId 9
-      , name = "Golem"
-      , cost = [ ( Build, 1 ), ( Command, 1 ), ( Magic, 2 ) ]
-      , effects =
-            [ (Summon (Creature 5 3 12))
-            , (Gain ( Magic, -1 ))
-            ]
-      }
-    ]
 
 
 invalidCardId : CardId
@@ -308,7 +91,7 @@ emptyGame =
 
 initialModel : Model
 initialModel =
-    { cards = someCards
+    { cards = allCards
     , game = emptyGame
     , rules = rules
     }
