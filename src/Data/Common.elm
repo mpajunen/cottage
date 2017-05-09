@@ -149,3 +149,10 @@ type alias Rules =
     , initialDraw : CardCount
     , roundDraw : CardCount
     }
+
+
+type alias Model =
+    { cards : Cards
+    , game : Game
+    , rules : Rules
+    }

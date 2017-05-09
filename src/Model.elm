@@ -1,28 +1,8 @@
-module Model exposing (..)
+module Model exposing (emptyGame, initialModel, invalidCard, invalidPieceId, ordPiece)
 
 import AllDict
 import Data.Cards exposing (allCards)
 import Data.Common exposing (..)
-
-
--- MODEL STRUCTURE
-
-
-type alias Model =
-    { cards : Cards
-    , game : Game
-    , rules : Rules
-    }
-
-
-type Msg
-    = NoOp
-    | EndTurn
-    | PlayCard Position
-    | SelectCard PieceId
-    | StartGame
-    | InitGame (List GameCard)
-
 
 
 -- INITIAL MODEL

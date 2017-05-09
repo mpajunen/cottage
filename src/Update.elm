@@ -1,14 +1,23 @@
-module Update exposing (..)
+module Update exposing (Msg, Msg(..), findPieceCard, getResourceGain, isCardPlayable, update)
 
 import AllDict
 import Array
 import Random
 import Random.Array
 import Data.Common exposing (..)
-import Model exposing (..)
+import Model exposing (emptyGame, invalidCard, ordPiece)
 
 
 -- ACTIONS
+
+
+type Msg
+    = NoOp
+    | EndTurn
+    | PlayCard Position
+    | SelectCard PieceId
+    | StartGame
+    | InitGame (List GameCard)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

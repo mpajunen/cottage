@@ -5,8 +5,8 @@ import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Dict
 import Data.Common exposing (..)
-import Model exposing (..)
-import Update exposing (..)
+import Model exposing (invalidPieceId)
+import Update exposing (Msg, Msg(..), findPieceCard, getResourceGain, isCardPlayable)
 
 
 -- VIEW STRUCTURE
