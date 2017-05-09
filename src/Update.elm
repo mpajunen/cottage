@@ -1,7 +1,8 @@
-module Update exposing (Msg, Msg(..), findPieceCard, getResourceGain, isCardPlayable, update)
+module Update exposing (Msg, Msg(..), buildCombat, findPieceCard, getResourceGain, isCardPlayable, update)
 
 import AllDict
 import Array
+import Dict
 import Random
 import Random.Array
 import Data.Common exposing (..)
@@ -294,6 +295,45 @@ findPieceCard { cards, game } id =
     AllDict.get id game.cards
         |> Maybe.map (findCard cards)
         |> Maybe.withDefault invalidCard
+
+
+buildCombat : Model -> Combat
+buildCombat model =
+    { own = buildCreatures model
+    , enemies = buildEnemies model
+    }
+
+
+buildCreatures : Model -> List Creature
+buildCreatures model =
+    let
+        { game } =
+            model
+
+        getCardEffects =
+            .card >> findPieceCard model >> .effects
+
+        getCreature effect =
+            case effect of
+                Summon creature ->
+                    Just creature
+
+                _ ->
+                    Nothing
+    in
+        List.map getCardEffects game.board
+            |> List.concat
+            |> List.filterMap getCreature
+
+
+buildEnemies : Model -> List Creature
+buildEnemies { enemies, game } =
+    let
+        currentRound =
+            game.turns.current.round
+    in
+        Dict.get currentRound enemies
+            |> Maybe.withDefault []
 
 
 isCardPlayable : Model -> Card -> Bool

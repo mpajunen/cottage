@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Dict
 import Data.Common exposing (..)
 import Model exposing (invalidPieceId)
-import Update exposing (Msg, Msg(..), findPieceCard, getResourceGain, isCardPlayable)
+import Update exposing (Msg, Msg(..), buildCombat, findPieceCard, getResourceGain, isCardPlayable)
 
 
 -- VIEW STRUCTURE
@@ -37,6 +37,7 @@ type alias CardView =
 
 type alias GameView =
     { board : Board
+    , combat : Combat
     , deck : CardCount
     , hand : List CardView
     , resources : List ResourceInfo
@@ -118,6 +119,7 @@ buildGame model =
     in
         { board = buildBoard model
         , deck = List.length game.deck
+        , combat = buildCombat model
         , hand = List.map (buildCard model) game.hand
         , resources = buildResources model
         , turns = List.map (buildTurn model) allTurns
@@ -249,6 +251,8 @@ gameView model =
     div [ style gameStyle ]
         [ h2 [] [ text "Board" ]
         , boardView model.board
+        , h2 [] [ text "Combat" ]
+        , combatView model.combat
         , h2 [] [ text "Resources" ]
         , resourcesView model.resources
         , h2 [] [ text "Hand" ]
@@ -303,6 +307,22 @@ boardCell cell =
             , onClick playCard
             ]
             [ content ]
+
+
+combatView : Combat -> Html Msg
+combatView combat =
+    let
+        getForces creatures =
+            if List.isEmpty creatures then
+                "None!"
+            else
+                List.map .name creatures
+                    |> String.join ", "
+    in
+        div []
+            [ div [] [ text ("Enemy forces: " ++ getForces combat.enemies) ]
+            , div [] [ text ("Own forces: " ++ getForces combat.own) ]
+            ]
 
 
 resourcesView : List ResourceInfo -> Html Msg

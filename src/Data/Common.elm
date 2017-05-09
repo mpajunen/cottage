@@ -137,6 +137,12 @@ type alias Enemies =
     Dict.Dict RoundNumber (List Creature)
 
 
+type alias Combat =
+    { own : List Creature
+    , enemies : List Creature
+    }
+
+
 type alias ResourceInfo =
     { resource : Resource
     , value : Int
