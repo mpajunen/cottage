@@ -1,6 +1,7 @@
 module Data.Cards exposing (allCards)
 
 import Data.Common exposing (..)
+import Data.Creatures exposing (..)
 
 
 allCards : Cards
@@ -49,25 +50,25 @@ allCards =
             ]
       }
     , { id = CardId 7
-      , name = "Footman"
+      , name = footman.name
       , cost = [ ( Command, 1 ) ]
       , effects =
-            [ (Summon (Creature 3 1 3))
+            [ (Summon footman)
             ]
       }
     , { id = CardId 8
-      , name = "Knight"
+      , name = knight.name
       , cost = [ ( Command, 3 ) ]
       , effects =
-            [ (Summon (Creature 6 2 8))
+            [ (Summon knight)
             , (Gain ( Command, -1 ))
             ]
       }
     , { id = CardId 9
-      , name = "Golem"
+      , name = golem.name
       , cost = [ ( Build, 1 ), ( Command, 1 ), ( Magic, 2 ) ]
       , effects =
-            [ (Summon (Creature 5 3 12))
+            [ (Summon golem)
             , (Gain ( Magic, -1 ))
             ]
       }

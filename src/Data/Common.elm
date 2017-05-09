@@ -26,7 +26,8 @@ type alias Life =
 
 
 type alias Creature =
-    { attack : Life
+    { name : String
+    , attack : Life
     , defense : Life
     , life : Life
     }
