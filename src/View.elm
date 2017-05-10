@@ -55,6 +55,7 @@ type alias PlayView =
 type alias TurnView =
     { draws : List CardView
     , plays : List PlayView
+    , combat : CombatResult
     , round : RoundNumber
     }
 
@@ -136,7 +137,7 @@ buildResources model =
 
 
 buildTurn : Model -> Turn -> TurnView
-buildTurn model { draws, plays, round } =
+buildTurn model { draws, plays, combat, round } =
     let
         buildDraw card =
             CardView card (findPieceCard model card) Normal
@@ -146,6 +147,7 @@ buildTurn model { draws, plays, round } =
     in
         { draws = List.map buildDraw draws
         , plays = List.map buildPlay plays
+        , combat = combat
         , round = round
         }
 
@@ -224,6 +226,7 @@ turnView turn =
             [ h4 [] [ text ("Turn " ++ toString turn.round) ]
             , div [] [ text (draws ++ " drawn.") ]
             , div [] [ text (plays ++ " played.") ]
+            , div [] [ text ("Combat result: " ++ toString turn.combat) ]
             ]
 
 

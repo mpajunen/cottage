@@ -47,6 +47,7 @@ firstTurn : Turn
 firstTurn =
     { draws = []
     , plays = []
+    , combat = Inconclusive
     , round = 1
     }
 

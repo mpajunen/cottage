@@ -108,6 +108,7 @@ type alias RoundNumber =
 type alias Turn =
     { draws : List PieceId
     , plays : List Play
+    , combat : CombatResult
     , round : RoundNumber
     }
 
@@ -141,6 +142,12 @@ type alias Combat =
     { own : List Creature
     , enemies : List Creature
     }
+
+
+type CombatResult
+    = Win
+    | Lose
+    | Inconclusive
 
 
 type alias ResourceInfo =

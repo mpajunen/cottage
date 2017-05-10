@@ -69,7 +69,8 @@ playGame model msg =
     in
         case msg of
             EndTurn ->
-                endTurn game
+                fightBattle model
+                    |> endTurn
                     |> draw rules.roundDraw
                     |> gainResources model
 
@@ -211,7 +212,7 @@ endTurn game =
 
         newTurns =
             { turns
-                | current = Turn [] [] (turn.round + 1)
+                | current = Turn [] [] Inconclusive (turn.round + 1)
                 , history = turns.history ++ [ turn ]
             }
     in
@@ -295,6 +296,86 @@ findPieceCard { cards, game } id =
     AllDict.get id game.cards
         |> Maybe.map (findCard cards)
         |> Maybe.withDefault invalidCard
+
+
+fightBattle : Model -> Game
+fightBattle model =
+    let
+        turn =
+            model.game.turns.current
+
+        result =
+            buildCombat model
+                |> fight
+    in
+        setCurrentTurn model.game { turn | combat = result }
+
+
+setCurrentTurn : Game -> Turn -> Game
+setCurrentTurn game turn =
+    let
+        { turns } =
+            game
+
+        newTurns =
+            { turns | current = turn }
+    in
+        { game | turns = newTurns }
+
+
+fight : Combat -> CombatResult
+fight { own, enemies } =
+    let
+        newEnemies =
+            makeAttacks own enemies
+
+        newOwn =
+            makeAttacks enemies own
+    in
+        case ( newOwn, newEnemies ) of
+            ( [], [] ) ->
+                Inconclusive
+
+            ( _, [] ) ->
+                Win
+
+            ( [], _ ) ->
+                Lose
+
+            ( _, _ ) ->
+                fight (Combat newOwn newEnemies)
+
+
+makeAttacks : List Creature -> List Creature -> List Creature
+makeAttacks attackers defenders =
+    List.foldl makeAttack defenders attackers
+
+
+makeAttack : Creature -> List Creature -> List Creature
+makeAttack attacker defenders =
+    let
+        target =
+            List.head defenders
+                |> Maybe.map (attackTarget attacker)
+
+        others =
+            List.tail defenders
+                |> Maybe.withDefault []
+    in
+        case target of
+            Just defender ->
+                if defender.life > 0 then
+                    defender :: others
+                else
+                    others
+
+            Nothing ->
+                others
+
+
+attackTarget : Creature -> Creature -> Creature
+attackTarget attacker defender =
+    { defender | life = defender.life - (attacker.attack - defender.defense) }
 
 
 buildCombat : Model -> Combat
