@@ -7,6 +7,7 @@ import Dict
 import Data.Common exposing (..)
 import Model exposing (invalidPieceId)
 import Update exposing (Msg, Msg(..), buildCombat, findPieceCard, getResourceGain, isCardPlayable)
+import View.Styles as Styles exposing (styles)
 
 
 -- VIEW STRUCTURE
@@ -183,7 +184,7 @@ view model =
             [ h1 [] [ text "Cottage" ]
             , button [ onClick StartGame ] [ text "Start game" ]
             , button [ onClick EndTurn ] [ text "End turn" ]
-            , div [ style mainStyle ]
+            , div [ styles Styles.content ]
                 [ gameView gameModel
                 , turnsView gameModel.turns
                 , cardsView model.cards
@@ -197,7 +198,7 @@ turnsView turns =
         rows =
             List.map turnView turns
     in
-        div [ style cardsStyle ]
+        div [ styles Styles.turns ]
             [ h2 [] [ text "Turns" ]
             , div [] rows
             ]
@@ -251,7 +252,7 @@ positionText { x, y } =
 
 gameView : GameView -> Html Msg
 gameView model =
-    div [ style gameStyle ]
+    div [ styles Styles.game ]
         [ h2 [] [ text "Board" ]
         , boardView model.board
         , h2 [] [ text "Combat" ]
@@ -301,12 +302,12 @@ boardCell cell =
 
         groundStyle =
             if y < 0 then
-                undergroundStyle
+                Styles.underground
             else
                 []
     in
         td
-            [ style (slotStyle ++ groundStyle)
+            [ styles (Styles.slot ++ groundStyle)
             , onClick playCard
             ]
             [ content ]
@@ -343,13 +344,13 @@ resourcesView resources =
 
 deckView : CardCount -> Html Msg
 deckView count =
-    div [ style deckStyle ]
+    div [ styles Styles.deck ]
         [ text ("(" ++ (toString count) ++ ")") ]
 
 
 cardsView : Cards -> Html Msg
 cardsView cards =
-    div [ style cardsStyle ]
+    div [ styles Styles.cards ]
         [ h2 [] [ text "Cards" ]
         , cardBox cards
         ]
@@ -357,13 +358,13 @@ cardsView cards =
 
 cardBox : Cards -> Html Msg
 cardBox cards =
-    div [ style cardBoxStyle ]
+    div [ styles Styles.cardBox ]
         (List.map cardView cards)
 
 
 cardView : Card -> Html Msg
 cardView card =
-    div [ style cardStyle ]
+    div [ styles Styles.card ]
         [ cardBar card
         , div [] (List.map effectView card.effects)
         ]
@@ -375,7 +376,7 @@ handView hand =
         handCards =
             List.map gameCardView hand
     in
-        div [ style cardBoxStyle ]
+        div [ styles Styles.cardBox ]
             handCards
 
 
@@ -385,16 +386,16 @@ gameCardView { id, card, status } =
         ( extraStyle, clickAction ) =
             case status of
                 Active ->
-                    ( selectedStyle, NoOp )
+                    ( Styles.selected, NoOp )
 
                 Normal ->
                     ( [], SelectCard id )
 
                 Unavailable ->
-                    ( unavailableStyle, NoOp )
+                    ( Styles.unavailable, NoOp )
     in
         div
-            [ style (cardStyle ++ extraStyle)
+            [ styles (Styles.card ++ extraStyle)
             , onClick clickAction
             ]
             [ cardBar card
@@ -404,9 +405,9 @@ gameCardView { id, card, status } =
 
 cardBar : Card -> Html Msg
 cardBar card =
-    div [ style cardBarStyle ]
-        [ div [ style cardTitleStyle ] [ text card.name ]
-        , div [ style cardCostStyle ] [ costView card.cost ]
+    div [ styles Styles.cardBar ]
+        [ div [ styles Styles.cardTitle ] [ text card.name ]
+        , div [ styles Styles.cardCost ] [ costView card.cost ]
         ]
 
 
@@ -424,7 +425,7 @@ effectView effect =
                 Summon creature ->
                     "Summon " ++ creatureText creature
     in
-        div [ style effectStyle ] [ text content ]
+        div [ styles Styles.effect ] [ text content ]
 
 
 costView : Resources -> Html Msg
@@ -455,111 +456,3 @@ resourceSymbol resource =
 
         Magic ->
             "M"
-
-
-
--- ELEMENT STYLES
-
-
-type alias Style =
-    List ( String, String )
-
-
-mainStyle : Style
-mainStyle =
-    [ ( "display", "flex" )
-    ]
-
-
-gameStyle : Style
-gameStyle =
-    [ ( "flex", "3 auto" )
-    ]
-
-
-cardsStyle : Style
-cardsStyle =
-    [ ( "flex", "1 auto" )
-    ]
-
-
-cardBoxStyle : Style
-cardBoxStyle =
-    [ ( "display", "flex" )
-    , ( "justify-content", "center" )
-    , ( "flex-flow", "row wrap" )
-    ]
-
-
-deckStyle : Style
-deckStyle =
-    cardStyle
-        ++ [ ( "display", "flex" )
-           , ( "background-color", "#dddddd" )
-           , ( "flex-flow", "column" )
-           , ( "align-items", "center" )
-           , ( "justify-content", "center" )
-           ]
-
-
-cardStyle : Style
-cardStyle =
-    [ ( "border", "1px solid #000000" )
-    , ( "height", "180px" )
-    , ( "width", "120px" )
-    , ( "margin", "5px" )
-    ]
-
-
-selectedStyle : Style
-selectedStyle =
-    [ ( "background-color", "#aaaaaa" )
-    ]
-
-
-cardBarStyle : Style
-cardBarStyle =
-    [ ( "display", "flex" )
-    ]
-
-
-cardCostStyle : Style
-cardCostStyle =
-    [ ( "flex", "1 auto" )
-    , ( "padding", "5px" )
-    ]
-
-
-cardTitleStyle : Style
-cardTitleStyle =
-    [ ( "flex", "3 auto" )
-    , ( "padding", "5px" )
-    ]
-
-
-effectStyle : Style
-effectStyle =
-    [ ( "padding", "5px" )
-    ]
-
-
-slotStyle : Style
-slotStyle =
-    [ ( "border", "1px solid #555555" )
-    , ( "height", "60px" )
-    , ( "width", "120px" )
-    , ( "margin", "5px" )
-    ]
-
-
-undergroundStyle : Style
-undergroundStyle =
-    [ ( "background-color", "#888888" )
-    ]
-
-
-unavailableStyle : Style
-unavailableStyle =
-    [ ( "border-color", "#aaaaaa" )
-    , ( "color", "#aaaaaa" )
-    ]
